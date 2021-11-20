@@ -13,6 +13,10 @@
         <small>Step 1: Your Login Credentials</small>
        </h6>
        <div class="form-floating mb-3">
+        <input v-model="data.student_id" type="text" class="form-control" id="floatingInput" placeholder="name@example.com" autocomplete="off" />
+        <label for="floatingInput">Student Number</label>
+       </div>
+       <div class="form-floating mb-3">
         <input v-model="data.email" type="email" class="form-control" id="floatingInput" placeholder="name@example.com" autocomplete="off" />
         <label for="floatingInput">Email address</label>
        </div>
@@ -53,6 +57,13 @@
         <input v-model="data.last_name" type="text" class="form-control" id="floatingInput" placeholder="name@example.com" autocomplete="off" />
         <label for="floatingInput">Last Name</label>
        </div>
+        <div class="form-floating mb-3">
+        <select v-model="data.course_id" class="form-select">
+         <option disabled value="">Select a course</option>
+         <option :value="course.id" v-for="(course, i) in allcourses" :key="i">{{course.course}}</option>
+        </select>
+        <label>Year Level</label>
+       </div>
        <div class="d-flex justify-content-center mt-4">
         <button href="" class="btn btn-primary px-2 me-3" v-on:click="prev">
          Previous
@@ -71,7 +82,7 @@
         <label for="floatingInput">Age</label>
        </div>
        <div class="form-floating mb-3">
-        <date-picker v-model="data.birthday" value-type="format" format="YYYY-MM-DD" placeholder="Select Date" class="w-100" autocomplete="off"></date-picker>
+        <date-picker v-model="data.birthday" value-type="format" format="YYYY-MM-DD" placeholder="Date of Birth " class="w-100" autocomplete="off"></date-picker>
        </div>
        <div class="form-floating mb-3">
         <select v-model="data.gender" class="form-select">
@@ -98,9 +109,24 @@
        <h6 class="mb-3">
         <small>Final Step: Your Education</small>
        </h6>
-       <div class="form-floating mb-3">
-        <input v-model="data.student_id" type="text" class="form-control" id="floatingInput" placeholder="name@example.com" autocomplete="off" />
-        <label for="floatingInput">Student Number</label>
+       <div class="mb-3">
+        <label>Upload Image</label>
+        <VueFileAgent
+          ref="vueFileAgent"
+          @select="filesSelected($event)"
+          :multiple="false"
+          :maxSize="'3MB'"
+          :deletable="true"
+          :accept="'image/*,'"
+          :theme="'list'"
+          @beforedelete="onBeforeDelete($event)"
+          @delete="fileDeleted($event)"
+          :errorText="{
+            type: 'Invalid file type. Only image file is allowed',
+            size: 'Image should not exceed 3MB in size',
+          }"
+          v-model="fileRecords"
+        ></VueFileAgent>
        </div>
        <div class="form-floating mb-3">
         <select v-model="data.year_level" class="form-select">
@@ -168,9 +194,12 @@
      student_id: '',
      section_id: '',
      organization_id: '',
+     course_id: '',
      type: '',
     },
     isLoading: false,
+    fileRecords: [],
+    fileRecordsForUpload: [],
    };
   },
   props: {
@@ -199,10 +228,12 @@
    document.title = 'Please Login';
    await this.$store.dispatch('sections/allSections');
    await this.$store.dispatch('organizations/allOrganizations');
+   await this.$store.dispatch('courses/allCourses');
   },
   computed: {
    ...mapState('sections', ['allsections']),
    ...mapState('organizations', ['allorganizations']),
+   ...mapState('courses', ['allcourses']),
    filteredSection() {
     return this.allsections.filter((section) => {
      return section.year_level === this.data.year_level;
@@ -211,6 +242,28 @@
   },
   methods: {
    ...mapActions('auth', ['createAccount', 'emailValidate']),
+   filesSelected: function(fileRecordsNewlySelected) {
+     var validFileRecords = fileRecordsNewlySelected.filter(
+       (fileRecord) => !fileRecord.error
+   );
+   this.fileRecordsForUpload = this.fileRecordsForUpload.concat(
+     validFileRecords
+   );
+   },
+   fileDeleted: function(fileRecord) {
+     var i = this.fileRecordsForUpload.indexOf(fileRecord);
+     if (i !== -1) {
+       this.fileRecordsForUpload.splice(i, 1);
+     }
+   },
+   onBeforeDelete: function(fileRecord) {
+     var i = this.fileRecordsForUpload.indexOf(fileRecord);
+     if (i !== -1) {
+       this.fileRecordsForUpload.splice(i, 1);
+      var k = this.fileRecords.indexOf(fileRecord);
+       if (k !== -1) this.fileRecords.splice(k, 1);
+     }
+   },
    disabledDate(date) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -219,6 +272,7 @@
    },
    async step1() {
     var password_val = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    if (this.data.student_id == '') return this.$toast.error('Student ID is required');
     if (this.data.email == '') return this.$toast.error('Email is required');
     if (this.data.password == '') return this.$toast.error('Password is required');
     if (this.data.type == 0) return this.$toast.error('Account Type is required');
@@ -251,10 +305,21 @@
    async register() {
     this.data.academic_year[1] = this.data.academic_year[1].toString().substring(2);
     this.data.acad_year = this.data.academic_year.join('-');
-    if (this.data.student_id == '') return this.$toast.error('Student ID is required');
+  
+    if (this.fileRecordsForUpload.length == 0) return this.$toast.error('Please include an image')
     if (this.data.year_level == 0) return this.$toast.error('Year level is required');
     if (this.data.section_id == 0) return this.$toast.error('Section is required');
     if (this.data.organization_id == 0) return this.$toast.error('Organization is required');
+
+      
+    if(this.fileRecordsForUpload.length > 0) {
+        const img = await this.$refs.vueFileAgent.upload(
+          'http://127.0.0.1:8000/api/uploadImage', 
+          {'X-Requested-With' : 'XMLHttpRequest'}, this.fileRecordsForUpload
+        );
+        this.data.image = img[0].data
+    }
+
     this.isLoading = true;
     const { data, status } = await this.createAccount(this.data);
     this.checkStatus(data, status, 'register', '');

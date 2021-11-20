@@ -39,6 +39,7 @@ class StudentsRequest extends FormRequest
             'type' => 'required|bail|max:15',
             'section_id' => 'required|bail|exists:sections,id',
             'organization_id' => 'required|bail|exists:organizations,id',
+            'course_id' => 'required|bail|exists:courses,id',
         ];
     }
 

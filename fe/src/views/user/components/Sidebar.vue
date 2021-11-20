@@ -26,32 +26,51 @@
    </template>
   </b-modal>
 
-  <b-modal id="settingsModal" centered title="Account Settings">
+  <b-modal id="settingsModal" scrollable centered title="Account Settings">
    <div class="row pe-4 ps-4 pt-2 pb-2">
     <div class="col">
+     <label for="item">Upload Image </label>
+      <VueFileAgent
+          ref="vueFileAgent"
+          @select="filesSelected($event)"
+          :multiple="false"
+          :maxSize="'3MB'"
+          :deletable="true"
+          :accept="'image/*,'"
+          :theme="'list'"
+          @beforedelete="onBeforeDelete($event)"
+          @delete="fileDeleted($event)"
+          :errorText="{
+            type: 'Invalid file type. Only image file is allowed',
+            size: 'Image should not exceed 3MB in size',
+          }"
+          v-model="fileRecords"
+        ></VueFileAgent>
+     <small class="mb-2 text-muted">This will replace your current image</small><br/>
+
      <label for="item">First Name</label>
-     <input v-model="data.first_name" id="item" type="text" class="form-control" placeholder="" aria-label="First Name" />
+     <input v-model="data.first_name" id="item" type="text" class="form-control mb-2" placeholder="" aria-label="First Name" />
 
      <label for="remarks">Middle Name</label>
-     <input v-model="data.middle_name" id="remarks" type="text" class="form-control" placeholder="" aria-label="Middle Name" />
+     <input v-model="data.middle_name" id="remarks" type="text" class="form-control mb-2" placeholder="" aria-label="Middle Name" />
 
      <label for="remarks">Last Name</label>
-     <input v-model="data.last_name" id="remarks" type="text" class="form-control" placeholder="" aria-label="Last Name" />
+     <input v-model="data.last_name" id="remarks" type="text" class="form-control mb-2" placeholder="" aria-label="Last Name" />
 
      <label for="remarks">Contact Number</label>
-     <input v-model="data.contact" id="remarks" type="text" class="form-control" placeholder="" aria-label="Contact Number" />
+     <input v-model="data.contact" id="remarks" type="text" class="form-control mb-2" placeholder="" aria-label="Contact Number" />
 
      <label for="gender">Select Gender</label>
-     <select id="gender" v-model="data.gender" class="form-select">
+     <select id="gender" v-model="data.gender" class="form-select mb-2">
       <option value="" disabled selected>Select Gender</option>
       <option value="Male">Male</option>
       <option value="Female">Female</option>
      </select>
 
      <label for="email">Email</label>
-     <input v-model="data.email" id="email" type="text" class="form-control" placeholder="" aria-label="Email" />
+     <input v-model="data.email" id="email" type="text" class="form-control mb-2" placeholder="" aria-label="Email" />
      <label for="email">Academic Year</label>
-     <input v-model="data.acad_year" id="text" type="text" class="form-control" />
+     <input v-model="data.acad_year" id="text" type="text" class="form-control mb-2" />
     </div>
    </div>
    <template #modal-footer="{cancel}">
@@ -94,6 +113,8 @@
      password: '',
      confirm_password: '',
     },
+    fileRecords: [],
+    fileRecordsForUpload: [],
     isLoading: false,
    };
   },
@@ -108,6 +129,28 @@
   },
   methods: {
    ...mapActions('auth', ['logoutAuthUser']),
+   filesSelected: function(fileRecordsNewlySelected) {
+     var validFileRecords = fileRecordsNewlySelected.filter(
+       (fileRecord) => !fileRecord.error
+   );
+   this.fileRecordsForUpload = this.fileRecordsForUpload.concat(
+     validFileRecords
+   );
+   },
+   fileDeleted: function(fileRecord) {
+     var i = this.fileRecordsForUpload.indexOf(fileRecord);
+     if (i !== -1) {
+       this.fileRecordsForUpload.splice(i, 1);
+     }
+   },
+   onBeforeDelete: function(fileRecord) {
+     var i = this.fileRecordsForUpload.indexOf(fileRecord);
+     if (i !== -1) {
+       this.fileRecordsForUpload.splice(i, 1);
+      var k = this.fileRecords.indexOf(fileRecord);
+       if (k !== -1) this.fileRecords.splice(k, 1);
+     }
+   },
    async logout() {
     const res = await this.logoutAuthUser();
     if (res.status == 200) {
@@ -126,15 +169,26 @@
    },
    async updateAccount() {
     this.isLoading = true;
+    
+    if(this.fileRecordsForUpload.length > 0) {
+        const img = await this.$refs.vueFileAgent.upload(
+          'http://127.0.0.1:8000/api/uploadImage', 
+          {'X-Requested-With' : 'XMLHttpRequest'}, this.fileRecordsForUpload
+        );
+        this.data.image = img[0].data
+    }
+
     const res = await this.$store.dispatch('auth/updateAccount', this.data);
+
     if (res.status == 200) {
-     this.$toast.success(res.data.msg);
+     this.$toast.success('Changes has been saved successfully!');
      await this.$store.dispatch('auth/checkUser');
      this.$bvModal.hide('saveChangesModal');
      this.data.confirm_password = '';
+     this.$bvModal.hide('settingsModal ');
     } else {
      this.data.confirm_password = '';
-     this.$toast.error(res.data.msg);
+     this.$toast.error('Something went wrong. Please try again');
     }
     this.isLoading = false;
    },

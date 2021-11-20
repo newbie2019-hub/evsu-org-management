@@ -52,9 +52,12 @@ Route::group(['middleware' => 'api'], function (){
     Route::group(['prefix' => 'admin'], function (){
         Route::get('college/all', [CollegeController::class, 'showall']);
         Route::apiResource('college', CollegeController::class);
+        Route::get('courses/all', [CoursesController::class, 'showall']);
         Route::apiResource('courses', CoursesController::class);
         Route::get('organization/all', [OrganizationController::class, 'showall']);
+        Route::post('search/organization', [OrganizationController::class, 'search']);
         Route::apiResource('organization', OrganizationController::class);
+        Route::post('search/students', [StudentsController::class, 'search']);
         Route::apiResource('students', StudentsController::class);
         Route::get('sections/all', [SectionsController::class, 'showall']);
         Route::apiResource('sections', SectionsController::class);
@@ -75,3 +78,4 @@ Route::group(['middleware' => 'api'], function (){
 });
 
 Route::post('validateEmail', [RegValidationController::class, 'validateEmail']);
+Route::post('uploadImage', [UserController::class, 'uploadUserImage']);

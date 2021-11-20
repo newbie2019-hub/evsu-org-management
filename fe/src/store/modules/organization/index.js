@@ -46,6 +46,16 @@ export default {
   
       return res;
      },
+    async searchOrganizations({commit}, {page, sort, data}){
+      const res = await API.post(`/admin/search/organization?page=${page}&sort=${sort}`, data).then(res => {
+        commit('SET_ORGANIZATIONS', res.data)
+        return res;
+      }).catch(err => {
+        return err.response
+      })
+  
+      return res;
+     },
      async saveOrganization({commit}, payload){
        const res = await API.post('/admin/organization', payload).then(res => {
          return res;

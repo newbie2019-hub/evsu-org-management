@@ -7,26 +7,24 @@
     <div class="col-12 col-sm-11 col-md-12 col-lg-11 col-xl-11 mt-4">
      <div class="card p-5">
       <div class="d-flex justify-content-end">
-       <button class="btn btn-primary" v-on:click.prevent="$bvModal.show('addStudentModal')"><i class="bi bi-node-plus me-2"></i>Student</button>
+      </div>
+      <div class="row justify-content-end mt-2">
+        <div class="d-block">
+           <button class="btn btn-primary" v-on:click.prevent="$bvModal.show('addStudentModal')"><i class="bi bi-node-plus me-2"></i>Student</button>
+        </div>
+        <div class="col-6 col-sm-5 col-md-5 col-lg-4 col-xl-3">
+          <div class="input-group  mb-3">
+            <input type="text" v-model="search" class="form-control" id="floatingSearchOrg" placeholder="Search here">
+            <button class="btn btn-primary"><i class="bi bi-search"></i></button>
+          </div>
+        </div>
       </div>
       <h5 class="text-center" v-if="students.data.length == 0">No accounts found</h5>
       <b-skeleton-table :rows="6" :columns="8" :table-props="{ bordered: true, striped: true }" class="mt-4" v-if="initialLoading"></b-skeleton-table>
       <div class="table-responsive mt-4" v-if="students.data.length > 0">
        <table class="table table-striped table-hover">
         <caption>
-         Showing
-         {{
-          students.from
-         }}
-         to
-         {{
-          students.to
-         }}
-         out of
-         {{
-          students.total
-         }}
-         data
+         Showing {{students.from}} to {{students.to}} out of {{students.total}} data
         </caption>
         <thead>
          <tr>
@@ -124,7 +122,7 @@
           <th scope="col">Email</th>
           <th scope="col">Academic Year</th>
           <th scope="col">Level</th>
-          <th scope="col">Section</th>
+          <th scope="col">Course</th>
           <th scope="col">Action</th>
          </tr>
         </thead>
@@ -137,7 +135,7 @@
           <td>{{ pending.email }}</td>
           <td class="text-nowrap">S.Y. {{ pending.userinfo.academic_year }}</td>
           <td class="text-nowrap">Year Level - {{ pending.userinfo.section.year_level }}</td>
-          <td class="text-nowrap">{{ pending.userinfo.section.section }}</td>
+          <td class="text-nowrap">{{ pending.userinfo.course.course }}</td>
           <td>
            <div class="d-flex">
             <a
@@ -462,6 +460,8 @@
 </template>
 <script>
  import { mapState } from 'vuex';
+const _ = require('lodash');
+
  export default {
   data() {
    return {
@@ -492,6 +492,7 @@
      id: '',
     },
     sort: 'asc',
+    search: '',
    };
   },
   async mounted() {
@@ -517,6 +518,18 @@
    });
    this.initialLoading = false;
   },
+  watch: {
+    search(){
+      this.debouncedStudentsSearch()
+    },
+    sort() {
+     this.getStudents();
+     this.getPendingStudents();
+   } ,
+  },
+  created: function () {
+    this.debouncedStudentsSearch = _.debounce(this.studentSearch, 800)
+  },
   computed: {
    ...mapState('college', ['allcolleges']),
    ...mapState('students', ['students', 'pending_students']),
@@ -534,13 +547,20 @@
    },
   },
   methods: {
+   async studentSearch(page = 1){
+     let data = {
+       search: this.search
+     }
+     this.isSearching = true
+     await this.$store.dispatch('students/searchStudents', {page: page, sort: this.sort, data: data})
+     this.isSearching = false
+   },
    async getStudents(page = 1) {
     await this.$store.dispatch('students/getStudents', {
      page: page,
      sort: this.sort,
     });
    },
-
    async getPendingStudents(page = 1) {
     await this.$store.dispatch('students/getPendingStudents', { page: page, sort: this.sort });
    },
@@ -548,6 +568,7 @@
     this.isLoading = true;
     const { data, status } = await this.$store.dispatch('students/approveStudent', this.approve_data);
     this.checkStatus(data, status, 'update', 'students/getStudents', '');
+    this.getStudents()
     await this.$store.dispatch('students/getPendingStudents', { page: page, sort: this.sort });
    },
    async saveStudent() {
@@ -596,12 +617,6 @@
    },
    closeModal() {
     this.$bvModal.hide(this.modalId);
-   },
-  },
-  watch: {
-   sort() {
-    this.getStudents();
-    this.getPendingStudents();
    },
   },
  };

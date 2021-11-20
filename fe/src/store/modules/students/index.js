@@ -5,6 +5,7 @@ export default {
     namespaced: true,
     state: {
         students: [],
+        allstudents: [],
         pending_students: []
     },
     getters: {
@@ -13,6 +14,9 @@ export default {
     mutations: {
         SET_STUDENTS(state, data) {
             state.students = data
+        },
+        SET_ALL_STUDENTS(state, data) {
+            state.allstudents = data
         },
         SET_PENDING_STUDENTS(state, data) {
             state.pending_students = data
@@ -26,6 +30,16 @@ export default {
         }
     },
     actions: {
+        async searchStudents({ commit }, { page, sort, data }) {
+            const res = await API.post(`/admin/search/students?page=${page}&sort=${sort}`, data).then(res => {
+                commit('SET_STUDENTS', res.data)
+                return res;
+            }).catch(err => {
+                return err.response
+            })
+
+            return res;
+        },
         async getStudents({ commit }, { page, sort }) {
             const res = await API.get(`/admin/students?page=${page}&sort=${sort}`).then(res => {
                 commit('SET_STUDENTS', res.data)

@@ -7,11 +7,12 @@ import Toast from "vue-toastification";
 import VueFileAgent from 'vue-file-agent';
 import DatePicker from 'vue2-datepicker';
 import 'vue-file-agent/dist/vue-file-agent.css';
- 
+
 import VueSocketIOExt from 'vue-socket.io-extended';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:3000'); //SOCKETIO SERVER URL
+//SOCKETIO SERVER URL
+const socket = io('http://localhost:3000'); 
 
 Vue.use(VueSocketIOExt, socket);
 Vue.use(BootstrapVue)
@@ -34,7 +35,7 @@ Vue.component('pagination', require('laravel-vue-pagination'));
 
 Vue.use(Toast, {
     position: "top-center",
-    timeout: 2000,
+    timeout: 4500,
     closeOnClick: true,
     pauseOnFocusLoss: true,
     pauseOnHover: true,

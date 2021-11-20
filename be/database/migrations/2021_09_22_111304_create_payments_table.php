@@ -19,7 +19,6 @@ class CreatePaymentsTable extends Migration
             $table->foreignId('organization_id')->constrained()->onDelete('cascade');
             $table->string('payment_for');
             $table->string('status');
-            $table->string('instructor');
             $table->string('amount');
             $table->timestamps();
         });

@@ -26,7 +26,8 @@ class AdminAccountSeeder extends Seeder
 
         AdminAccount::create([
             'email' => 'groupcapstone12@gmail.com',
-            'password' => Hash::make('porgarlib99'),
+            'password' => Hash::make('123123'),
+            // 'password' => Hash::make('porgarlib99'),
             'admin_account_info_id' => $account_info->id
         ]);
     }

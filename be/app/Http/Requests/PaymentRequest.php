@@ -27,7 +27,6 @@ class PaymentRequest extends FormRequest
             'payment_for' => 'bail|required|max:200',
             'status' => 'bail|required|max:50',
             'amount' => 'bail|required|max:20',
-            'instructor' => 'bail|required|max:100',
         ];
     }
 }

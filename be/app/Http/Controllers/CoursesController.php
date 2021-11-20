@@ -12,7 +12,12 @@ class CoursesController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:admin');
+        $this->middleware('auth:admin', ['except' => ['showall']]);
+    }
+
+    public function showall()
+    {
+        return response()->json(Course::with(['college:id,college'])->get());
     }
     
     public function index(Request $request)

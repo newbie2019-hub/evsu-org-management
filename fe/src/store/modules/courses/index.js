@@ -4,11 +4,15 @@ export default {
   namespaced: true,
   state: {
     courses: [],
+    allcourses: [],
   },
   getters: {
     
   },
   mutations: {
+    SET_ALL_COURSES(state, data) {
+      state.allcourses = data
+    },
     SET_COURSES(state, data) {
       state.courses = data
     },
@@ -22,6 +26,16 @@ export default {
     }
   },
   actions: {
+    async allCourses({commit}){
+      const res = await API.get(`/admin/courses/all`).then(res => {
+        commit('SET_ALL_COURSES', res.data)
+        return res;
+      }).catch(err => {
+        return err.response
+      })
+  
+      return res;
+     },
     async getCourses({commit}, {page, sort}){
       const res = await API.get(`/admin/courses?page=${page}&sort=${sort}`).then(res => {
         commit('SET_COURSES', res.data)

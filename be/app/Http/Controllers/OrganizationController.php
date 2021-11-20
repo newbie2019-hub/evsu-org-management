@@ -18,6 +18,14 @@ class OrganizationController extends Controller
         return response()->json(Organization::get(['id', 'organization', 'abbreviation']));
     }
 
+    public function search(Request $request)
+    {
+        return response()->json(
+            Organization::where('organization', 'like', '%'.$request->search.'%')->with(['college:id,college'])
+            ->orderBy('organization', $request->sort)
+            ->paginate(8));
+    }
+
     public function index(Request $request)
     {
         return response()->json(Organization::with(['college:id,college'])->orderBy('organization', $request->sort)->paginate(8));

@@ -8,13 +8,18 @@
         </p>
         <div class="col-12 col-sm-11 col-md-12 col-lg-11 col-xl-11 mt-4">
           <div class="card p-5">
-            <div class="d-flex justify-content-end">
-              <button
-                class="btn btn-primary"
-                v-on:click.prevent="$bvModal.show('addOrganizationModal')"
-              >
-                <i class="bi bi-node-plus me-2"></i>Organization
-              </button>
+            <div class="row justify-content-end mt-2">
+              <div class="d-block">
+                <button class="btn btn-primary" v-on:click.prevent="$bvModal.show('addOrganizationModal')">
+                  <i class="bi bi-node-plus me-2"></i>Organization
+                </button>
+              </div>
+              <div class="col-6 col-sm-5 col-md-5 col-lg-4 col-xl-4">
+                <div class="input-group  mb-3">
+                  <input type="text" v-model="search" class="form-control" id="floatingSearchOrg" placeholder="Search here">
+                  <button class="btn btn-primary"><i class="bi bi-search"></i></button>
+                </div>
+              </div>
             </div>
             <b-skeleton-table
               :rows="6"
@@ -25,39 +30,15 @@
             ></b-skeleton-table>
             <div class="table-responsive mt-4" v-else>
               <table class="table table-striped table-hover">
-                <caption>
-                  Showing
-                  {{
-                    organizations.from
-                  }}
-                  to
-                  {{
-                    organizations.to
-                  }}
-                  out of
-                  {{
-                    organizations.total
-                  }}
-                  data
-                </caption>
+                <caption> Showing {{organizations.from}} to {{organizations.to}} out of {{organizations.total}} data </caption>
                 <thead>
                   <tr>
                     <th scope="col">ID</th>
-                    <th scope="col">College</th>
-                    <th
-                      class="cursor-pointer"
-                      v-on:click.prevent="sort = sort == 'asc' ? 'desc' : 'asc'"
-                    >
+                    <th class="cursor-pointer text-nowrap" v-on:click.prevent="sort = sort == 'asc' ? 'desc' : 'asc'">
                       Organization
-                      <i
-                        class="bi"
-                        :class="
-                          sort == 'asc'
-                            ? 'bi-arrow-up-short'
-                            : 'bi-arrow-down-short'
-                        "
-                      ></i>
+                      <i class="bi" :class="sort == 'asc' ? 'bi-arrow-up-short' : 'bi-arrow-down-short'"></i>
                     </th>
+                    <th scope="col">College</th>
                     <th scope="col">Abbreviation</th>
                     <th scope="col">Action</th>
                   </tr>
@@ -65,8 +46,8 @@
                 <tbody>
                   <tr v-for="(org, i) in organizations.data" :key="i">
                     <td scope="row">{{ i + organizations.from }}</td>
-                    <td>{{ org.college.college }}</td>
                     <td>{{ org.organization }}</td>
+                    <td>{{ org.college.college }}</td>
                     <td>{{ org.abbreviation }}</td>
                     <td>
                       <div class="d-flex">
@@ -242,6 +223,8 @@
 </template>
 <script>
 import { mapState } from "vuex";
+const _ = require('lodash');
+
 export default {
   data() {
     return {
@@ -254,6 +237,7 @@ export default {
       delete_data: {
         id: "",
       },
+      search: '',
       sort: "asc",
     };
   },
@@ -273,11 +257,30 @@ export default {
     });
     this.initialLoading = false;
   },
+  watch: {
+    search(){
+      this.debouncedOrganizationSearch()
+    },
+    sort() {
+      this.getOrganizations();
+    },
+  },
+  created: function () {
+    this.debouncedOrganizationSearch = _.debounce(this.orgSearch, 800)
+  },
   computed: {
     ...mapState("college", ["allcolleges"]),
     ...mapState("organizations", ["organizations"]),
   },
   methods: {
+    async orgSearch(page = 1){
+      let data = {
+        search: this.search
+      }
+      this.isSearching = true
+      await this.$store.dispatch('organizations/searchOrganizations', {page: page, sort: this.sort, data: data})
+      this.isSearching = false
+    },
     async getOrganizations(page = 1) {
       await this.$store.dispatch("organizations/getOrganizations", {
         page: page,
@@ -320,11 +323,6 @@ export default {
     },
     closeModal() {
       this.$bvModal.hide(this.modalId);
-    },
-  },
-  watch: {
-    sort() {
-      this.getOrganizations();
     },
   },
 };

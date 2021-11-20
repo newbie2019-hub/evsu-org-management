@@ -27,6 +27,7 @@ class CreateUserInfosTable extends Migration
             $table->string('academic_year', 20);
             $table->foreignId('section_id')->constrained()->onDelete('cascade');
             $table->foreignId('organization_id')->constrained()->onDelete('cascade');
+            $table->foreignId('course_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

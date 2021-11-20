@@ -26,12 +26,12 @@ class ChatController extends Controller
 
     public function store(Request $request)
     {
-        if(auth()->user()->userinfo->type == 'admin'){
-            $conversation = Conversation::where('receiver_id', auth()->user()->id)->where('sender_id', $request->receiver_id)->first();
-        }
-        else {
-            $conversation = Conversation::where('sender_id', auth()->user()->id)->where('receiver_id', $request->receiver_id)->first();
-        }
+
+        $conversation = Conversation::where('receiver_id', auth()->user()->id)
+        ->where('sender_id', $request->receiver_id)
+        ->orWhere('receiver_id', $request->receiver_id)->orWhere('sender_id', auth()->user()->id)
+        ->first();
+
         // return response()->json($conversation);
         if(empty($conversation)){
             $conv = Conversation::create([

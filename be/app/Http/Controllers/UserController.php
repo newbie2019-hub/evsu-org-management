@@ -12,7 +12,7 @@ class UserController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'store']]);
+        $this->middleware('auth:api', ['except' => ['login', 'store', 'uploadUserImage']]);
     }
 
     public function update(Request $request)
@@ -42,6 +42,9 @@ class UserController extends Controller
         $user = [
             'email' => $request->email
         ];
+        if($request->image){
+            $user['image'] = $request->image;
+        }
 
         if($request->password){
             $user['password'] = Hash::make($request->password);
@@ -68,6 +71,7 @@ class UserController extends Controller
             'year_level' => $request->year_level,
             'academic_year' => $request->acad_year,
             'section_id' => $request->section_id,
+            'course_id' => $request->course_id,
             'organization_id' => $request->organization_id,
         ]);
 
@@ -76,6 +80,7 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'student_id' => $request->student_id,
             'user_info_id' => $userinfo->id,
+            'image' => $request->image
         ]);
 
         return $this->success('Student registered successfully and waiting for approval');
@@ -115,6 +120,12 @@ class UserController extends Controller
             'expires_in' => auth('api')->factory()->getTTL() * 60,
             'user' => auth('api')->user()
         ]);
+    }
+
+    public function uploadUserImage(Request $request){
+        $picName = time().'.'.$request->file->extension();
+        $request->file->move(public_path('uploads'), $picName);
+        return $picName;
     }
 
     public function me()

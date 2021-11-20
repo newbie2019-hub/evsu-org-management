@@ -90,8 +90,6 @@
      <input v-model="data.amount" id="amount" type="number" class="form-control" placeholder="" aria-label="Amount"/>
      <label class="mt-2" for="status">Status</label>
      <input v-model="data.status" id="status" type="text" class="form-control" placeholder="" aria-label="Status" />
-      <label class="mt-2" for="instructor">Instructor</label>
-     <input v-model="data.instructor" id="instructor" type="text" class="form-control" placeholder="" aria-label="Instructor">
     </div>
    </div>
     <template #modal-footer = {cancel} >
@@ -122,7 +120,6 @@ export default {
     user_id: [],
     payment_for: '',
     amount: '',
-    instructor: '',
     status: '',
    },
    delete_data: {
@@ -161,7 +158,6 @@ export default {
       if(this.data.payment_for == '') return this.$toast.error('Payment for is required')
       if(this.data.amount == '') return this.$toast.error('Amount is required')
       if(this.data.status == '') return this.$toast.error('Status is required')
-      if(this.data.instructor == '') return this.$toast.error('Instructor is required')
 
       this.isLoading = true
       const { data, status } = await this.$store.dispatch('payment/savePayment', this.data)
@@ -172,7 +168,6 @@ export default {
       if(this.data.payment_for == '') return this.$toast.error('Payment for is required')
       if(this.data.amount == '') return this.$toast.error('Amount is required')
       if(this.data.status == '') return this.$toast.error('Status is required')
-      if(this.data.instructor == '') return this.$toast.error('Instructor is required')
 
       this.isLoading = true
       const { data, status } = await this.$store.dispatch('payment/updatePayment', this.data)

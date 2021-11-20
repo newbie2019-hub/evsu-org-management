@@ -1,13 +1,14 @@
 <template>
  <div>
   <div class="navigation" v-if="user.userinfo">
-   <avatar v-if="user.userinfo" class="ms-4" :username="user.userinfo.first_name + ' ' + user.userinfo.last_name" :rounded="true" :size="40" :color="'#fff'" :lighten="100"></avatar>
-   <div class="d-flex flex-column">
-    <p class="text-dark username lh-sm" v-if="user">{{ user.userinfo.first_name }} {{ user.userinfo.last_name }}!</p>
-    <p class="text-muted username lh-sm" v-if="user">
+   <b-avatar variant="info" v-if="user.image" :src="`http://127.0.0.1:8000/uploads/` + user.image"></b-avatar>
+   <b-avatar variant="info" v-else :text="user.userinfo.first_name[0] + user.userinfo.last_name[0]"></b-avatar>
+   <div class="d-flex flex-column lh-0">
+    <p class="text-dark username" v-if="user">{{ user.userinfo.first_name }} {{ user.userinfo.last_name }}!</p>
+    <p class="text-muted username" v-if="user">
      <small>{{ user.email }}</small>
     </p>
-    <p class="text-muted username lh-sm" v-if="user">
+    <p class="text-muted username" v-if="user">
      <small>S.Y. {{ user.userinfo.academic_year }}</small>
     </p>
    </div>
@@ -15,12 +16,8 @@
  </div>
 </template>
 <script>
- import Avatar from 'vue-avatar';
  import { mapState, mapActions } from 'vuex';
  export default {
-  components: {
-   Avatar,
-  },
   async mounted() {
    await this.checkUser();
   },

@@ -1,15 +1,8 @@
 <template>
   <div>
     <div class="navigation" v-if="user.admininfo">
-      <avatar
-        v-if="user.admininfo"
-        class="ms-4"
-        :username="user.admininfo.first_name + ' ' + user.admininfo.last_name"
-        :rounded="true"
-        :size="40"
-        :color="'#fff'"
-        :lighten="100"
-      ></avatar>
+      <b-avatar variant="info" v-if="user.admininfo.image" :src="`http://127.0.0.1:8000/uploads/` + user.admininfo.image"></b-avatar>
+      <b-avatar variant="info" v-else :text="user.admininfo.first_name[0] + user.admininfo.last_name[0]"></b-avatar>
       <div class="d-flex flex-column">
         <p class="text-dark username lh-sm" v-if="user">
           Welcome, {{ user.admininfo.first_name }}
@@ -23,12 +16,8 @@
   </div>
 </template>
 <script>
-import Avatar from "vue-avatar";
 import { mapState, mapActions } from "vuex";
 export default {
-  components: {
-    Avatar,
-  },
   async mounted() {
     await this.checkAdminUser();
   },

@@ -5,7 +5,7 @@
    <router-link to="/dashboard/colleges"><i class="bi bi-plus-circle"></i>Colleges</router-link>
    <router-link to="/dashboard/courses"><i class="bi bi-diagram-2"></i>Courses</router-link>
    <router-link to="/dashboard/organizations"><i class="bi bi-people"></i> Organization</router-link>
-   <router-link to="/dashboard/sections"><i class="bi bi-cursor"></i> Sections</router-link>
+   <!-- <router-link to="/dashboard/sections"><i class="bi bi-cursor"></i> Sections</router-link> -->
    <router-link to="/dashboard/students"><i class="bi bi-person-circle"></i> Students</router-link>
    <router-link to="/dashboard/announcements"><i class="bi bi-megaphone"></i> Announcements</router-link>
    <a href="" v-on:click.prevent="setValues(); $bvModal.show('settingsModal')" ><i class="bi bi-tools"></i> Settings</a>
@@ -21,9 +21,28 @@
     </template>
    </b-modal>
 
-  <b-modal id="settingsModal" centered title="Account Settings">
+  <b-modal id="settingsModal" scrollable centered title="Account Settings">
    <div class="row pe-4 ps-4 pt-2 pb-2">
     <div class="col">
+      <label for="item">Upload Image </label>
+      <VueFileAgent
+          ref="vueFileAgent"
+          @select="filesSelected($event)"
+          :multiple="false"
+          :maxSize="'3MB'"
+          :deletable="true"
+          :accept="'image/*,'"
+          :theme="'list'"
+          @beforedelete="onBeforeDelete($event)"
+          @delete="fileDeleted($event)"
+          :errorText="{
+            type: 'Invalid file type. Only image file is allowed',
+            size: 'Image should not exceed 3MB in size',
+          }"
+          v-model="fileRecords"
+        ></VueFileAgent>
+     <small class="mb-2 text-muted">This will replace your current image</small><br/>
+
      <label for="firstname">First Name</label>
      <input v-model="data.first_name" id="firstname" type="text" class="form-control" placeholder="" aria-label="First Name">
      
@@ -86,6 +105,8 @@ export default {
         confirm_password: '',
       },
       isLoading: false,
+      fileRecords: [],
+      fileRecordsForUpload: [],
     }
   },
   filters: {
@@ -105,6 +126,28 @@ export default {
   },
   methods: {
    ...mapActions('auth', ['logoutUser']),
+   filesSelected: function(fileRecordsNewlySelected) {
+     var validFileRecords = fileRecordsNewlySelected.filter(
+       (fileRecord) => !fileRecord.error
+   );
+   this.fileRecordsForUpload = this.fileRecordsForUpload.concat(
+     validFileRecords
+   );
+   },
+   fileDeleted: function(fileRecord) {
+     var i = this.fileRecordsForUpload.indexOf(fileRecord);
+     if (i !== -1) {
+       this.fileRecordsForUpload.splice(i, 1);
+     }
+   },
+   onBeforeDelete: function(fileRecord) {
+     var i = this.fileRecordsForUpload.indexOf(fileRecord);
+     if (i !== -1) {
+       this.fileRecordsForUpload.splice(i, 1);
+      var k = this.fileRecords.indexOf(fileRecord);
+       if (k !== -1) this.fileRecords.splice(k, 1);
+     }
+   },
    async logout(){
      const res = await this.logoutUser()
      if(res.status == 200){
@@ -122,6 +165,14 @@ export default {
    },
    async updateAccount(){
      this.isLoading = true
+      if(this.fileRecordsForUpload.length > 0) {
+        const img = await this.$refs.vueFileAgent.upload(
+          'http://127.0.0.1:8000/api/uploadImage', 
+          {'X-Requested-With' : 'XMLHttpRequest'}, this.fileRecordsForUpload
+        );
+        this.data.image = img[0].data
+      }
+
      const res = await this.$store.dispatch('auth/updateAdminAccount', this.data)
      if(res.status == 200){
        this.$toast.success(res.data.msg)

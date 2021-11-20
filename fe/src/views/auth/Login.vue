@@ -2,9 +2,9 @@
  <div>
   <div class="hero ">
    <div class="d-flex justify-content-center align-items-center h-100">
-    <div class="col-10 col-sm-10 col-md-6 col-lg-5 col-xl-4">
+    <div class="col-10 col-sm-10 col-md-6 col-lg-4 col-xl-4">
      <div class="card p-5">
-      <h4 class="mb-3 mt-2">Login</h4>
+      <h4 class="mb-3 mt-2">Organization Portal </h4>
       <p class="mb-4">
        <small>Welcome! Please fill in your email and password to sign-in.</small>
       </p>
