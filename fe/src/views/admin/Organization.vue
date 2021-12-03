@@ -128,6 +128,12 @@
 				<div class="col">
 					<label class="mt-2" for="item">College</label>
 					<input v-model="data.college.college" id="item" type="text" class="form-control" placeholder="" aria-label="First Name" disabled readonly />
+					<label class="mt-2" for="item">Organization Type</label>
+					<select v-model="data.orgservice" class="form-select">
+						<option value="1">Service Oriented</option>
+						<option value="2">Course Oriented</option>
+						<option value="3">Values Oriented</option>
+					</select>
 					<label class="mt-2" for="remarks">Organization</label>
 					<input v-model="data.organization" id="remarks" type="text" class="form-control" placeholder="" aria-label="Middle Name" />
 					<label class="mt-2" for="remarks">Abbreviation <small>(Optional)</small></label>
