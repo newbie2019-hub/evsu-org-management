@@ -21,19 +21,19 @@ class OrganizationController extends Controller
     public function search(Request $request)
     {
         return response()->json(
-            Organization::where('organization', 'like', '%'.$request->search.'%')->with(['college:id,college'])
+            Organization::where('organization', 'like', '%'.$request->search.'%')->with(['college:id,college','orgtype:id,name'])
             ->orderBy('organization', $request->sort)
             ->paginate(8));
     }
 
     public function index(Request $request)
     {
-        return response()->json(Organization::with(['college:id,college'])->orderBy('organization', $request->sort)->paginate(8));
+        return response()->json(Organization::with(['college:id,college', 'orgtype:id,name'])->orderBy('organization', $request->sort)->paginate(8));
     }
 
     public function store(OrganizationRequest $request)
     {
-       Organization::create($request->validated() + ['abbreviation' => $request->abbreviation]);
+       Organization::create($request->validated() + ['abbreviation' => $request->abbreviation, 'organization_service_id' => $request->orgservice]);
        return $this->success('Organization added succesfully!');
     }
 
@@ -41,7 +41,7 @@ class OrganizationController extends Controller
     {
         $org = Organization::find($id);
         if(!empty($org)) {
-            $org->update($request->validated() + ['abbreviation' => $request->abbreviation]);
+            $org->update($request->validated() + ['abbreviation' => $request->abbreviation, 'organization_service_id' => $request->orgservice]);
             return $this->success('Organization updated successfully!');
         }
         else {

@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             AdminAccountSeeder::class,
             CollegeSeeder::class,
             CourseSeeder::class,
+            OrganizationServicesSeeder::class,
             OrganizationSeeder::class,
             SectionSeeder::class,
         ]);

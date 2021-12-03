@@ -15,6 +15,7 @@ class CreateOrganizationsTable extends Migration
     {
         Schema::create('organizations', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_service_id')->constrained()->onDelete('cascade');
             $table->foreignId('college_id')->constrained()->onDelete('cascade');
             $table->string('organization');
             $table->string('abbreviation', 20)->nullable();
