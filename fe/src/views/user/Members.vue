@@ -241,6 +241,13 @@
       <option v-for="(sec, i) in filteredSection" :key="i" :value="sec.id">{{ sec.section }}</option>
      </select>
     </div>
+    <div class="col-6">
+     <label class="mt-2">Course</label>
+     <select v-model="data.course_id" class="form-select">
+      <option disabled value="">Select a course</option>
+      <option :value="course.id" v-for="(course, i) in allcourses" :key="i">{{ course.course }}</option>
+     </select>
+    </div>
    </div>
    <template #modal-footer="{cancel}">
     <b-button variant="primary" size="sm" @click="cancel()" :disabled="isLoading"> Cancel </b-button>
@@ -317,8 +324,17 @@
       <option :value="sec.id" v-for="(sec, i) in filteredUpdateSection" :key="i">{{ sec.section }}</option>
      </select>
     </div>
-    <div class="col-6 mt-4">
+    <div class="col-6">
+     <label class="mt-2">Academic Year</label>
      <input class="form-control" v-model="update_data.userinfo.academic_year" />
+    </div>
+
+    <div class="col-6">
+     <label class="mt-2">Course</label>
+     <select v-model="update_data.userinfo.course_id" class="form-select">
+      <option disabled value="">Select a course</option>
+      <option :value="course.id" v-for="(course, i) in allcourses" :key="i">{{ course.course }}</option>
+     </select>
     </div>
    </div>
    <template #modal-footer="{cancel}">
@@ -399,6 +415,13 @@
     <div class="col-6 mt-4">
      <p class="">S.Y. {{ update_data.userinfo.academic_year }}</p>
     </div>
+    <div class="col-6">
+     <label class="mt-2">Course</label>
+     <select v-model="update_data.userinfo.course_id" disabled class="form-select">
+      <option disabled value="">Select a course</option>
+      <option :value="course.id" v-for="(course, i) in allcourses" :key="i">{{ course.course }}</option>
+     </select>
+    </div>
    </div>
    <template #modal-footer="{cancel}">
     <b-button variant="primary" size="sm" @click="cancel()" :disabled="isLoading"> Close </b-button>
@@ -436,6 +459,7 @@
      middle_name: '',
      last_name: '',
      gender: '',
+     course_id: '',
      contact: '',
      type: '',
      section_id: '',
@@ -462,6 +486,7 @@
   async mounted() {
    document.title = 'Organization Members';
    await this.$store.dispatch('auth/checkUser');
+   await this.$store.dispatch('courses/allCourses');
    await this.$store.dispatch('sections/allSections');
    this.getMembers();
    this.getPendingMembers();
@@ -486,6 +511,7 @@
    ...mapState('auth', ['user']),
    ...mapState('sections', ['allsections']),
    ...mapState('organizations', ['allorganizations']),
+   ...mapState('courses', ['allcourses']),
    filteredSection() {
     return this.allsections.filter((section) => {
      return section.year_level === this.data.year_level;
@@ -507,14 +533,12 @@
    async approveStudent(page = 1) {
     this.isLoading = true;
     const { data, status } = await this.$store.dispatch('members/approveMember', this.approve_data);
-    this.checkStatus(data, status, 'update', 'members/getMembers', '');
+    this.checkStatus(data, status, 'update', 'members/getMembers', 'members/getPendingMembers');
     await this.$store.dispatch('members/getPendingMembers', { page: page, sort: this.sort });
    },
    async saveStudent() {
-    if (this.data.academic_year == []) return this.$toast.error('Academic year is required');
-    this.data.academic_year[1] = this.data.academic_year[1].toString().substring(2);
-    this.data.acad_year = this.data.academic_year.join('-');
     if (this.data.student_id == '') return this.$toast.error('Student ID is required');
+    if (this.data.section_id == '') return this.$toast.error('Section is required');
     if (this.data.email == '') return this.$toast.error('Email is required');
     if (this.data.password == '') return this.$toast.error('Password is required');
     if (this.data.first_name.trim() == '') return this.$toast.error('First Name is required');
@@ -522,13 +546,17 @@
     if (this.data.last_name.trim() == '') return this.$toast.error('Last Name is required');
     if (this.data.gender == '') return this.$toast.error('Gender is required');
     if (this.data.contact == '') return this.$toast.error('Contact is required');
+    if (this.data.academic_year == '') return this.$toast.error('Academic year is required');
+    this.data.academic_year[1] = this.data.academic_year[1].toString().substring(2);
+    this.data.acad_year = this.data.academic_year.join('-');
     if (this.data.type == '') return this.$toast.error('Account Type is required');
     if (this.data.year_level == '') return this.$toast.error('Year Level is required');
+    if (this.data.course_id == '') return this.$toast.error('Course is required');
     if (this.data.organization_id == '') return this.$toast.error('Organization is required');
 
     this.isLoading = true;
     const { data, status } = await this.$store.dispatch('members/saveMember', this.data);
-    this.checkStatus(data, status, '', 'members/getMembers', '');
+    this.checkStatus(data, status, '', 'members/getMembers', 'members/getPendingMembers');
    },
    async updateStudent() {
     this.update_data.userinfo.acad_year = this.update_data.userinfo.academic_year;
@@ -542,6 +570,8 @@
     if (this.update_data.userinfo.gender == '') return this.$toast.error('Gender is required');
     if (this.update_data.userinfo.contact == '') return this.$toast.error('Contact is required');
     if (this.update_data.userinfo.type == '') return this.$toast.error('Account Type is required');
+    if (this.update_data.userinfo.course_id == '') return this.$toast.error('Course is required');
+    if (this.update_data.userinfo.section_id == '') return this.$toast.error('Section is required');
     if (this.update_data.userinfo.year_level == '') return this.$toast.error('Year Level is required');
     if (this.update_data.userinfo.organization_id == '') return this.$toast.error('Organization is required');
 
@@ -552,7 +582,7 @@
    async deleteStudent(page = 1) {
     this.isLoading = true;
     const { data, status } = await this.$store.dispatch('members/deleteMember', this.delete_data);
-    this.checkStatus(data, status, '', 'members/getMembers', '');
+    this.checkStatus(data, status, '', 'members/getMembers', 'members/getPendingMembers');
     await this.$store.dispatch('members/getPendingMembers', { page: page, sort: this.sort });
    },
    closeModal() {

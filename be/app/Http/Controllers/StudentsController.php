@@ -36,7 +36,7 @@ class StudentsController extends Controller
 
     public function index()
     {
-        return response()->json(User::with(['userinfo', 'userinfo.section:id,section,year_level', 'userinfo.organization:id,organization'])->where('account_status', 'approved')->paginate(8));
+        return response()->json(User::with(['userinfo', 'userinfo.section:id,section,year_level', 'userinfo.organization:id,organization', 'userinfo.course:id,course'])->where('account_status', 'approved')->paginate(8));
     }
 
     /**
@@ -76,7 +76,7 @@ class StudentsController extends Controller
             $query->where('type', 'admin');
         })->with([
             'userinfo', 
-            'userinfo.course',
+            'userinfo.course:id,course',
             'userinfo.section:id,section,year_level', 
             'userinfo.organization:id,organization'
             ])->where('account_status', 'pending')->paginate(8));
@@ -91,7 +91,7 @@ class StudentsController extends Controller
                 'account_status' => 'approved'
             ]);
 
-            $updated_user = User::with(['userinfo', 'userinfo.section:id,section,year_level', 'course', 'userinfo.organization:id,organization'])->find($id);
+            $updated_user = User::with(['userinfo', 'userinfo.section:id,section,year_level', 'userinfo.course:id,course', 'userinfo.organization:id,organization'])->find($id);
             return response()->json([$updated_user, 'msg' => 'Member approved successfully!']);
         }
         else{
@@ -123,7 +123,7 @@ class StudentsController extends Controller
                 'year_level' => $request->userinfo['year_level'],
                 'section_id' => $request->userinfo['section_id'],
                 'organization_id' => $request->userinfo['organization_id'],
-                'course_id' => $request->userinfo['course_Id'],
+                'course_id' => $request->userinfo['course_id'],
             ]);
 
             $user->update([
@@ -131,7 +131,7 @@ class StudentsController extends Controller
                 'student_id' => $request->student_id,
             ]);
 
-            $updated_user = User::with(['userinfo', 'userinfo.section:id,section,year_level', 'userinfo.organization:id,organization'])->find($id);
+            $updated_user = User::with(['userinfo', 'userinfo.section:id,section,year_level', 'userinfo.course:id,course', 'userinfo.organization:id,organization'])->find($id);
             return response()->json([$updated_user, 'msg' => 'Student information updated successfully!']);
         }
         else 

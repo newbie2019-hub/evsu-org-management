@@ -16,7 +16,7 @@ class CreateUsersTable extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('student_id', 50);
-            $table->longText('image');
+            $table->longText('image')->nullable()->default('No image');
             $table->string('email')->unique();
             $table->string('password');
             $table->string('account_status')->default('pending');

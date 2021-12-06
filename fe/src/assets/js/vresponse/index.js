@@ -7,7 +7,7 @@ export default {
         };
     },
     methods: {
-        async checkStatus(data, status, type, dispatch, dispatch2, config) {
+        async checkStatus(data, status, type, dispatch, dispatch2) {
             if (status == 422) {
                 this.UnprocEntity(data);
             } else if (status == 200) {

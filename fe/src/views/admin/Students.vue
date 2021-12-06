@@ -6,25 +6,36 @@
     <p class="text-muted">Manage officially students registered on the system</p>
     <div class="col-12 col-sm-11 col-md-12 col-lg-11 col-xl-11 mt-4">
      <div class="card p-5">
-      <div class="d-flex justify-content-end">
-      </div>
+      <div class="d-flex justify-content-end"></div>
       <div class="row justify-content-end mt-2">
-        <div class="d-block">
-           <button class="btn btn-primary" v-on:click.prevent="$bvModal.show('addStudentModal')"><i class="bi bi-node-plus me-2"></i>Student</button>
+       <div class="d-block">
+        <button class="btn btn-primary" v-on:click.prevent="$bvModal.show('addStudentModal')"><i class="bi bi-node-plus me-2"></i>Student</button>
+       </div>
+       <div class="col-6 col-sm-5 col-md-5 col-lg-4 col-xl-3">
+        <div class="input-group  mb-3">
+         <input type="text" v-model="search" class="form-control" id="floatingSearchOrg" placeholder="Search here" />
+         <button class="btn btn-primary"><i class="bi bi-search"></i></button>
         </div>
-        <div class="col-6 col-sm-5 col-md-5 col-lg-4 col-xl-3">
-          <div class="input-group  mb-3">
-            <input type="text" v-model="search" class="form-control" id="floatingSearchOrg" placeholder="Search here">
-            <button class="btn btn-primary"><i class="bi bi-search"></i></button>
-          </div>
-        </div>
+       </div>
       </div>
       <h5 class="text-center" v-if="students.data.length == 0">No accounts found</h5>
       <b-skeleton-table :rows="6" :columns="8" :table-props="{ bordered: true, striped: true }" class="mt-4" v-if="initialLoading"></b-skeleton-table>
       <div class="table-responsive mt-4" v-if="students.data.length > 0">
        <table class="table table-striped table-hover">
         <caption>
-         Showing {{students.from}} to {{students.to}} out of {{students.total}} data
+         Showing
+         {{
+          students.from
+         }}
+         to
+         {{
+          students.to
+         }}
+         out of
+         {{
+          students.total
+         }}
+         data
         </caption>
         <thead>
          <tr>
@@ -223,6 +234,13 @@
      <input v-model="data.contact" id="contact" type="text" class="form-control" placeholder="" />
     </div>
     <div class="col-6">
+     <label class="mt-2">Course</label>
+     <select v-model="data.course_id" class="form-select">
+      <option disabled value="">Select a course</option>
+      <option :value="course.id" v-for="(course, i) in allcourses" :key="i">{{ course.course }}</option>
+     </select>
+    </div>
+    <div class="col-6">
      <label class="mt-2" for="type">Type</label>
      <select v-model="data.type" id="type" type="text" class="form-select" placeholder="">
       <option disabled selected>Select an account type</option>
@@ -313,6 +331,13 @@
      <input v-model="update_data.userinfo.contact" id="contact" type="text" class="form-control" placeholder="" />
     </div>
     <div class="col-6">
+     <label class="mt-2">Course</label>
+     <select v-model="update_data.userinfo.course_id" class="form-select">
+      <option disabled value="">Select a course</option>
+      <option :value="course.id" v-for="(course, i) in allcourses" :key="i">{{ course.course }}</option>
+     </select>
+    </div>
+    <div class="col-6">
      <label class="mt-2" for="type">Type</label>
      <select v-model="update_data.userinfo.type" id="type" type="text" class="form-select" placeholder="">
       <option disabled selected>Select an account type</option>
@@ -345,7 +370,8 @@
       >
      </select>
     </div>
-    <div class="col-6 mt-4">
+    <div class="col-6">
+     <label class="mt-2">Academic Year</label>
      <input class="form-control" v-model="update_data.userinfo.academic_year" />
     </div>
    </div>
@@ -414,12 +440,23 @@
      <input disabled v-model="update_data.userinfo.contact" id="contact" type="text" class="form-control" placeholder="" />
     </div>
     <div class="col-6">
+     <label class="mt-2">Course</label>
+     <select v-model="update_data.userinfo.course_id" disabled class="form-select">
+      <option disabled value="">Select a course</option>
+      <option :value="course.id" v-for="(course, i) in allcourses" :key="i">{{ course.course }}</option>
+     </select>
+    </div>
+    <div class="col-6">
      <label class="mt-2" for="type">Type</label>
      <select disabled v-model="update_data.userinfo.type" id="type" type="text" class="form-select" placeholder="">
       <option disabled selected>Select an account type</option>
       <option value="admin">Admin</option>
       <option value="member">Member</option>
      </select>
+    </div>
+
+    <div class="col-6 mt-4 pt-3">
+     <p class="">S.Y. {{ update_data.userinfo.academic_year }}</p>
     </div>
    </div>
    <div class="row">
@@ -431,9 +468,6 @@
       <option value="III">Year Level - III</option>
       <option value="IV">Year Level - IV</option>
      </select>
-    </div>
-    <div class="col-6 mt-4">
-     <p class="">S.Y. {{ update_data.userinfo.academic_year }}</p>
     </div>
     <div class="col-6">
      <label class="mt-2" for="section">Section</label>
@@ -460,7 +494,7 @@
 </template>
 <script>
  import { mapState } from 'vuex';
-const _ = require('lodash');
+ const _ = require('lodash');
 
  export default {
   data() {
@@ -470,6 +504,7 @@ const _ = require('lodash');
      middle_name: '',
      last_name: '',
      gender: '',
+     course_id: '',
      contact: '',
      type: '',
      section_id: '',
@@ -500,6 +535,7 @@ const _ = require('lodash');
    await this.$store.dispatch('auth/checkAdminUser');
    await this.$store.dispatch('organizations/allOrganizations');
    await this.$store.dispatch('sections/allSections');
+   await this.$store.dispatch('courses/allCourses');
    this.getStudents();
    this.getPendingStudents();
    this.$root.$on('bv::modal::show', (modalId) => {
@@ -519,22 +555,23 @@ const _ = require('lodash');
    this.initialLoading = false;
   },
   watch: {
-    search(){
-      this.debouncedStudentsSearch()
-    },
-    sort() {
-     this.getStudents();
-     this.getPendingStudents();
-   } ,
+   search() {
+    this.debouncedStudentsSearch();
+   },
+   sort() {
+    this.getStudents();
+    this.getPendingStudents();
+   },
   },
-  created: function () {
-    this.debouncedStudentsSearch = _.debounce(this.studentSearch, 800)
+  created: function() {
+   this.debouncedStudentsSearch = _.debounce(this.studentSearch, 800);
   },
   computed: {
    ...mapState('college', ['allcolleges']),
    ...mapState('students', ['students', 'pending_students']),
    ...mapState('sections', ['allsections']),
    ...mapState('organizations', ['allorganizations']),
+   ...mapState('courses', ['allcourses']),
    filteredSection() {
     return this.allsections.filter((section) => {
      return section.year_level === this.data.year_level;
@@ -547,13 +584,13 @@ const _ = require('lodash');
    },
   },
   methods: {
-   async studentSearch(page = 1){
-     let data = {
-       search: this.search
-     }
-     this.isSearching = true
-     await this.$store.dispatch('students/searchStudents', {page: page, sort: this.sort, data: data})
-     this.isSearching = false
+   async studentSearch(page = 1) {
+    let data = {
+     search: this.search,
+    };
+    this.isSearching = true;
+    await this.$store.dispatch('students/searchStudents', { page: page, sort: this.sort, data: data });
+    this.isSearching = false;
    },
    async getStudents(page = 1) {
     await this.$store.dispatch('students/getStudents', {
@@ -567,15 +604,14 @@ const _ = require('lodash');
    async approveStudent(page = 1) {
     this.isLoading = true;
     const { data, status } = await this.$store.dispatch('students/approveStudent', this.approve_data);
-    this.checkStatus(data, status, 'update', 'students/getStudents', '');
-    this.getStudents()
+    this.checkStatus(data, status, 'update', 'students/getStudents', 'students/getPendingStudents');
+    this.getStudents();
     await this.$store.dispatch('students/getPendingStudents', { page: page, sort: this.sort });
    },
    async saveStudent() {
-    if (this.data.academic_year == []) return this.$toast.error('Academic year is required');
-    this.data.academic_year[1] = this.data.academic_year[1].toString().substring(2);
-    this.data.acad_year = this.data.academic_year.join('-');
     if (this.data.student_id == '') return this.$toast.error('Student ID is required');
+    if (this.data.section_id == '') return this.$toast.error('Section is required');
+    if (this.data.course_id == '') return this.$toast.error('Course is required');
     if (this.data.email == '') return this.$toast.error('Email is required');
     if (this.data.password == '') return this.$toast.error('Password is required');
     if (this.data.first_name.trim() == '') return this.$toast.error('First Name is required');
@@ -586,10 +622,13 @@ const _ = require('lodash');
     if (this.data.type == '') return this.$toast.error('Account Type is required');
     if (this.data.year_level == '') return this.$toast.error('Year Level is required');
     if (this.data.organization_id == '') return this.$toast.error('Organization is required');
+    if (this.data.academic_year == '') return this.$toast.error('Academic year is required');
+    this.data.academic_year[1] = this.data.academic_year[1].toString().substring(2);
+    this.data.acad_year = this.data.academic_year.join('-');
 
     this.isLoading = true;
     const { data, status } = await this.$store.dispatch('students/saveStudent', this.data);
-    this.checkStatus(data, status, '', 'students/getStudents', '');
+    this.checkStatus(data, status, '', 'students/getStudents', 'students/getPendingStudents');
    },
    async updateStudent() {
     this.update_data.userinfo.acad_year = this.update_data.userinfo.academic_year;
@@ -601,6 +640,8 @@ const _ = require('lodash');
     if (this.update_data.userinfo.middle_name.trim() == '') return this.$toast.error('Middle Name is required');
     if (this.update_data.userinfo.last_name.trim() == '') return this.$toast.error('Last Name is required');
     if (this.update_data.userinfo.gender == '') return this.$toast.error('Gender is required');
+    if (this.update_data.userinfo.course_id == '') return this.$toast.error('Course is required');
+    if (this.update_data.userinfo.section_id == '') return this.$toast.error('Section is required');
     if (this.update_data.userinfo.contact == '') return this.$toast.error('Contact is required');
     if (this.update_data.userinfo.type == '') return this.$toast.error('Account Type is required');
     if (this.update_data.userinfo.year_level == '') return this.$toast.error('Year Level is required');
@@ -608,7 +649,7 @@ const _ = require('lodash');
 
     this.isLoading = true;
     const { data, status } = await this.$store.dispatch('students/updateStudent', this.update_data);
-    this.checkStatus(data, status, 'update', '', '');
+    this.checkStatus(data, status, 'update', 'students/getStudents', 'students/getPendingStudents');
    },
    async deleteStudent() {
     this.isLoading = true;
