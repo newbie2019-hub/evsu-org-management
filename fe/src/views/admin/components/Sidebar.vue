@@ -1,22 +1,22 @@
 <template>
-	<div class="sidenav">
+	<div id="sidenav" class="sidenav">
 		<p class="text-center mt-5 mb-4 text-white fw-bolder">ADMIN</p>
 		<!-- <router-link to="/dashboard/home"><i class="bi bi-house"></i> Dashboard</router-link> -->
-		<router-link to="/dashboard/colleges"><i class="bi bi-plus-circle"></i>Colleges</router-link>
-		<router-link to="/dashboard/courses"><i class="bi bi-diagram-2"></i>Courses</router-link>
-		<router-link to="/dashboard/organizations"><i class="bi bi-people"></i> Organization</router-link>
+		<router-link to="/dashboard/colleges"><i class="bi bi-plus-circle "></i><span>Colleges</span></router-link>
+		<router-link to="/dashboard/courses"><i class="bi bi-diagram-2"></i><span>Courses</span></router-link>
+		<router-link to="/dashboard/organizations"><i class="bi bi-people"></i> <span>Organization</span></router-link>
 		<!-- <router-link to="/dashboard/sections"><i class="bi bi-cursor"></i> Sections</router-link> -->
-		<router-link to="/dashboard/students"><i class="bi bi-person-circle"></i> Students</router-link>
-		<router-link to="/dashboard/announcements"><i class="bi bi-megaphone"></i> Announcements</router-link>
+		<router-link to="/dashboard/students"><i class="bi bi-person-circle"></i> <span>Students</span></router-link>
+		<router-link to="/dashboard/announcements"><i class="bi bi-megaphone"></i> <span>Announcements</span></router-link>
 		<a
 			href=""
 			v-on:click.prevent="
 				setValues();
 				$bvModal.show('settingsModal');
 			"
-			><i class="bi bi-tools"></i> Settings</a
+			><i class="bi bi-tools"></i> <span>Settings</span></a
 		>
-		<a href="" v-on:click.prevent="$bvModal.show('logoutModal')"><i class="bi bi-x-circle"></i> Log-out</a>
+		<a href="" v-on:click.prevent="$bvModal.show('logoutModal')"><i class="bi bi-x-circle"></i> <span>Log-out</span></a>
 
 		<b-modal id="logoutModal" centered title="Logout">
 			<p class="my-4">Are you sure you want to log-out?</p>
@@ -93,6 +93,9 @@
 				</b-button>
 			</template>
 		</b-modal>
+		<div id="closenav" class="closenav" @click.prevent="toggleSideNav">
+				<p>X</p>
+		</div>
 	</div>
 </template>
 <script>
@@ -169,7 +172,7 @@
 			async updateAccount() {
 				this.isLoading = true;
 				if (this.fileRecordsForUpload.length > 0) {
-					const img = await this.$refs.vueFileAgent.upload('http://127.0.0.1:8000/api/uploadImage', { 'X-Requested-With': 'XMLHttpRequest' }, this.fileRecordsForUpload);
+					const img = await this.$refs.vueFileAgent.upload('http://www.be.evsu-organization-system.com/api/uploadImage', { 'X-Requested-With': 'XMLHttpRequest' }, this.fileRecordsForUpload);
 					this.data.image = img[0].data;
 				}
 
@@ -185,6 +188,10 @@
 				}
 				this.isLoading = false;
 			},
+			toggleSideNav(){
+					const sideNav = document.getElementById('sidenav')
+					sideNav.classList.toggle('toggleNav')
+			}
 		},
 		computed: {
 			...mapState('auth', ['user']),

@@ -1,26 +1,24 @@
 <template>
-	<div class="sidenav">
-		<p class="text-center mt-5 mb-4 text-white fw-bolder">MANAGEMENT</p>
+	<div id="sidenav" class="sidenav">
+		<p class="text-center mt-5 mb-4 text-white fw-bolder"><span class="d-sm-none d-md-none d-lg-block">MANAGEMENT</span></p>
 		<!-- <router-link to="/user/home"><i class="bi bi-house"></i> Dashboard</router-link> -->
-		<router-link to="/user/members"><i class="bi bi-people"></i>Members</router-link>
-		<router-link to="/user/announcements"><i class="bi bi-megaphone"></i> Announcements</router-link>
-		<router-link to="/user/payments"><i class="bi bi-cash-coin"></i>Payment Records</router-link>
-		<router-link to="/user/chat"><i class="bi bi-chat-fill"></i>Chatbox</router-link>
-		<a
-			href=""
-			v-on:click.prevent="
+		<router-link to="/user/members"><i class="bi bi-people"></i><span>Members</span></router-link>
+		<router-link to="/user/announcements"><i class="bi bi-megaphone"></i> <span>Announcements</span></router-link>
+		<router-link to="/user/payments"><i class="bi bi-cash-coin"></i><span>Payments</span></router-link>
+		<router-link to="/user/chat"><i class="bi bi-chat-fill"></i><span>Chatbox</span></router-link>
+		<a href="" v-on:click.prevent="
 				setValues();
 				$bvModal.show('settingsModal');
 			"
-			><i class="bi bi-tools"></i> Settings</a
+			><i class="bi bi-tools"></i> <span>Settings</span></a
 		>
-		<a href="" v-on:click.prevent="$bvModal.show('logoutModal')"><i class="bi bi-x-circle"></i> Log-out</a>
+		<a href="" v-on:click.prevent="$bvModal.show('logoutModal')"><i class="bi bi-x-circle"></i> <span>Log-out</span></a>
 
 		<b-modal id="logoutModal" centered title="Logout">
 			<p class="my-4">Are you sure you want to log-out?</p>
 			<template #modal-footer="{cancel}">
-				<b-button variant="primary" size="sm" @click="cancel()"> Cancel </b-button>
-				<b-button size="sm" variant="danger" v-on:click.prevent="logout">
+				<b-button variant="primary" @click="cancel()"> Cancel </b-button>
+				<b-button variant="danger" v-on:click.prevent="logout">
 					Logout
 				</b-button>
 			</template>
@@ -74,8 +72,8 @@
 				</div>
 			</div>
 			<template #modal-footer="{cancel}">
-				<b-button variant="primary" size="sm" @click="cancel()" :disabled="isLoading"> Cancel </b-button>
-				<b-button variant="success" size="sm" v-on:click.prevent="$bvModal.show('saveChangesModal')" :disabled="isLoading">
+				<b-button variant="primary"	 @click="cancel()" :disabled="isLoading"> Cancel </b-button>
+				<b-button variant="success"	 v-on:click.prevent="$bvModal.show('saveChangesModal')" :disabled="isLoading">
 					Update
 				</b-button>
 			</template>
@@ -93,6 +91,10 @@
 				</b-button>
 			</template>
 		</b-modal>
+
+		<div id="closenav" class="closenav" @click.prevent="toggleSideNav">
+				<p>X</p>
+		</div>
 	</div>
 </template>
 <script>
@@ -167,7 +169,7 @@
 				this.isLoading = true;
 
 				if (this.fileRecordsForUpload.length > 0) {
-					const img = await this.$refs.vueFileAgent.upload('http://127.0.0.1:8000/api/uploadImage', { 'X-Requested-With': 'XMLHttpRequest' }, this.fileRecordsForUpload);
+					const img = await this.$refs.vueFileAgent.upload('http://www.be.evsu-organization-system.com/api/uploadImage', { 'X-Requested-With': 'XMLHttpRequest' }, this.fileRecordsForUpload);
 					this.data.image = img[0].data;
 				}
 
@@ -185,6 +187,10 @@
 				}
 				this.isLoading = false;
 			},
+			toggleSideNav(){
+					const sideNav = document.getElementById('sidenav')
+					sideNav.classList.toggle('toggleNav')
+			}
 		},
 		computed: {
 			...mapState('auth', ['user']),
