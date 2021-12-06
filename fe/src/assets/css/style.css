@@ -16,9 +16,14 @@ body {
 
 /** NAVIGATION */
 
+.bi-2x {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
 .navigation {
     background-color: rgb(255, 255, 255);
-    width: calc(100% - 250px);
+    width: calc(100% - 240px);
     right: 0;
     top: 0;
     position: fixed;
@@ -28,6 +33,7 @@ body {
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
     z-index: 2;
 }
 
@@ -110,15 +116,31 @@ nav ul li a:hover {
     color: rgb(240, 240, 240);
 }
 
+.toggleNav {
+    width: 100% !important;
+    transition: all 250ms;
+    z-index: 10;
+}
+
+.closenav {
+    position: absolute;
+    top: 5%;
+    right: 10%;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+}
+
 .sidenav {
     position: fixed;
     left: 0;
     top: 0;
     height: 100vh;
-    width: 250px;
+    width: 240px;
     overflow: auto;
     padding-bottom: 1rem;
     background-image: linear-gradient(to top, maroon, maroon);
+    transform: all 250ms;
 }
 
 .sidenav .logo {
@@ -204,4 +226,104 @@ h5 {
 .badge-warning {
     color: #212529;
     background-color: #ffc107;
+}
+
+.sidenav a span {
+    display: block;
+}
+
+.btn-toggle {
+    display: none !important;
+}
+
+.closenav {
+    display: none !important;
+}
+
+@media only screen and (max-width: 876px) {
+    .sidenav {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        width: 70px;
+        overflow: auto;
+        padding-bottom: 1rem;
+        background-image: linear-gradient(to top, maroon, maroon);
+    }
+    .sidenav a span {
+        display: none;
+    }
+    .sidenav a {
+        display: flex;
+        padding: 15px 20px;
+        color: white;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none;
+    }
+    .sidenav a:hover {
+        background: rgba(255, 217, 0, 0.404);
+        color: white;
+    }
+    .sidenav a i {
+        margin-right: 0px;
+    }
+    .navigation {
+        background-color: rgb(255, 255, 255);
+        width: calc(100% - 70px);
+        right: 0;
+        top: 0;
+        position: fixed;
+        height: 70px;
+        padding: 10px 15px;
+        box-shadow: 0px 4px 5px rgba(44, 44, 44, 0.068);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        z-index: 2;
+    }
+    .content-container {
+        margin-left: 85px;
+        margin-top: 75px;
+    }
+}
+
+@media only screen and (max-width: 560px) {
+    .btn-toggle {
+        display: block !important;
+    }
+    .closenav {
+        display: block !important;
+    }
+    .sidenav {
+        width: 0px;
+        padding-bottom: 1rem;
+        background-image: linear-gradient(to top, maroon, maroon);
+        z-index: 5;
+    }
+    .sidenav a span {
+        display: block;
+    }
+    .sidenav a {
+        display: flex;
+        padding: 15px 20px;
+        color: white;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none;
+    }
+    .sidenav a:hover {
+        background: rgba(255, 217, 0, 0.404);
+        color: white;
+    }
+    .sidenav a i {
+        margin-right: 15px;
+    }
+    .navigation {
+        width: calc(100%);
+    }
+    .content-container {
+        margin-left: 0px;
+    }
 }
