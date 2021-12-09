@@ -2,7 +2,87 @@
  <div>
   <div class="container pt-5">
    <div class="row ">
-    <h5 class="text-primary">Official Members</h5>
+    <h5 class="text-primary">Official Organization Admins</h5>
+    <p class="text-muted">Listed below are the approved admins in your organization</p>
+    <div class="col-12 col-sm-11 col-md-12 col-lg-11 col-xl-11 mt-4">
+     <div class="card p-5">
+      <div class="d-flex justify-content-end">
+       <button v-if="user.userinfo.type == 'admin'" class="btn btn-primary" v-on:click.prevent="$bvModal.show('addMemberModal')"><i class="bi bi-node-plus me-2"></i>Add Member</button>
+      </div>
+      <h5 class="text-center" v-if="admins.data.length == 0">No member found</h5>
+      <div class="table-responsive mt-4" v-if="admins.data.length > 0">
+       <table class="table table-striped table-hover">
+        <caption>
+         Showing
+         {{
+          admins.from
+         }}
+         to
+         {{
+          admins.to
+         }}
+         out of
+         {{
+          admins.total
+         }}
+         data
+        </caption>
+        <thead>
+         <tr>
+          <th scope="col">ID</th>
+          <th scope="col" class="text-nowrap">Student ID</th>
+          <th scope="col">Name</th>
+          <th scope="col">Gender</th>
+          <th scope="col">Email</th>
+          <th scope="col">Academic Year</th>
+          <th scope="col">Level</th>
+          <th scope="col">Section</th>
+          <th scope="col" v-if="user.userinfo.type == 'admin'">Action</th>
+         </tr>
+        </thead>
+        <tbody>
+         <tr v-for="(stud, i) in admins.data" :key="i">
+          <td scope="row">{{ i + admins.from }}</td>
+          <td>{{ stud.student_id }}</td>
+          <td class="text-nowrap">{{ stud.userinfo.first_name }} {{ stud.userinfo.last_name }}</td>
+          <td>{{ stud.userinfo.gender }}</td>
+          <td>{{ stud.email }}</td>
+          <td>S.Y. {{ stud.userinfo.academic_year }}</td>
+          <td class="text-nowrap">Year Level - {{ stud.userinfo.section.year_level }}</td>
+          <td class="text-nowrap">{{ stud.userinfo.section.section }}</td>
+          <td v-if="user.userinfo.type == 'admin'">
+           <div class="d-flex">
+            <a
+             v-on:click.prevent="
+              update_data = JSON.parse(JSON.stringify(stud));
+              $bvModal.show('updateStudentModal');
+             "
+             href=""
+             class="btn btn-primary btn-sm me-1 rounded-pill"
+             ><i class="bi bi-pencil"></i
+            ></a>
+            <a
+             v-on:click.prevent="
+              delete_data.id = stud.id;
+              $bvModal.show('deleteStudentModal');
+             "
+             href=""
+             class="btn btn-danger btn-sm rounded-pill"
+             ><i class="bi bi-trash"></i
+            ></a>
+           </div>
+          </td>
+         </tr>
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div class="container pt-5">
+   <div class="row ">
+    <h5 class="text-primary">Official Organization Members</h5>
     <p class="text-muted">Listed below are the approved members in your organization</p>
     <div class="col-12 col-sm-11 col-md-12 col-lg-11 col-xl-11 mt-4">
      <div class="card p-5">
@@ -210,8 +290,11 @@
    </div>
    <div class="row">
     <div class="col-6">
-     <label class="mt-2" for="contact">Contact</label>
-     <input v-model="data.contact" id="contact" type="text" class="form-control" placeholder="" />
+     <label for="" class="mt-2">Contact</label>
+     <div class="input-group mb-3">
+      <span class="input-group-text" id="basic-addon1">+63</span>
+      <input v-model="data.contact" type="number" class="form-control" placeholder="9366036099" aria-label="9366036099" aria-describedby="basic-addon1" />
+     </div>
     </div>
     <div class="col-6">
      <label class="mt-2" for="type">Type</label>
@@ -237,7 +320,7 @@
     </div>
     <div class="col-6">
      <label class="mt-2" for="section">Section</label>
-     <select v-model="data.section_id" id="section" class="form-select" placeholder="">
+     <select v-model="data.section" id="section" class="form-select" placeholder="">
       <option v-for="(sec, i) in filteredSection" :key="i" :value="sec.id">{{ sec.section }}</option>
      </select>
     </div>
@@ -296,8 +379,10 @@
    </div>
    <div class="row">
     <div class="col-6">
-     <label class="mt-2" for="contact">Contact</label>
-     <input v-model="update_data.userinfo.contact" id="contact" type="text" class="form-control" placeholder="" />
+     <label for="" class="mt-2">Contact</label>
+     <div class="input-group mb-3">
+      <input v-model="update_data.userinfo.contact" type="number" class="form-control" placeholder="9366036099" aria-label="9366036099" aria-describedby="basic-addon1" />
+     </div>
     </div>
     <div class="col-6">
      <label class="mt-2" for="type">Type</label>
@@ -408,7 +493,7 @@
     </div>
     <div class="col-6">
      <label class="mt-2" for="section">Section</label>
-     <select disabled v-model="update_data.userinfo.section_id" id="section" class="form-select" placeholder="">
+     <select disabled v-model="update_data.userinfo.section" id="section" class="form-select" placeholder="">
       <option :value="sec.id" v-for="(sec, i) in filteredUpdateSection" :key="i">{{ sec.section }}</option>
      </select>
     </div>
@@ -462,7 +547,7 @@
      course_id: '',
      contact: '',
      type: '',
-     section_id: '',
+     section: '',
      year_level: 'I',
      student_id: '',
      email: '',
@@ -489,6 +574,7 @@
    await this.$store.dispatch('courses/allCourses');
    await this.$store.dispatch('sections/allSections');
    this.getMembers();
+   this.getAdmins();
    this.getPendingMembers();
    this.$root.$on('bv::modal::show', (modalId) => {
     this.modalId = modalId.componentId;
@@ -507,7 +593,7 @@
   },
   computed: {
    ...mapState('college', ['allcolleges']),
-   ...mapState('members', ['members', 'pending_members']),
+   ...mapState('members', ['members', 'pending_members', 'admins']),
    ...mapState('auth', ['user']),
    ...mapState('sections', ['allsections']),
    ...mapState('organizations', ['allorganizations']),
@@ -527,6 +613,9 @@
    async getMembers(page = 1) {
     await this.$store.dispatch('members/getMembers', { page: page, sort: this.sort });
    },
+   async getAdmins(page = 1) {
+    await this.$store.dispatch('members/allAdmins', { page: page, sort: this.sort });
+   },
    async getPendingMembers(page = 1) {
     await this.$store.dispatch('members/getPendingMembers', { page: page, sort: this.sort });
    },
@@ -537,8 +626,9 @@
     await this.$store.dispatch('members/getPendingMembers', { page: page, sort: this.sort });
    },
    async saveStudent() {
+    var contactval = /^((9)(|\d{9,9}))$/gm;
+    if (this.data.section == '') return this.$toast.error('Section is required');
     if (this.data.student_id == '') return this.$toast.error('Student ID is required');
-    if (this.data.section_id == '') return this.$toast.error('Section is required');
     if (this.data.email == '') return this.$toast.error('Email is required');
     if (this.data.password == '') return this.$toast.error('Password is required');
     if (this.data.first_name.trim() == '') return this.$toast.error('First Name is required');
@@ -553,12 +643,24 @@
     if (this.data.year_level == '') return this.$toast.error('Year Level is required');
     if (this.data.course_id == '') return this.$toast.error('Course is required');
     if (this.data.organization_id == '') return this.$toast.error('Organization is required');
-
-    this.isLoading = true;
-    const { data, status } = await this.$store.dispatch('members/saveMember', this.data);
-    this.checkStatus(data, status, '', 'members/getMembers', 'members/getPendingMembers');
+    if (this.data.contact.match(contactval)) {
+     const { data, status } = await this.$store.dispatch('members/saveMember', this.data);
+     if (status == 200) {
+      var string = '63';
+      var number = string + this.data.contact;
+      this.data.contact = number;
+      this.isLoading = true;
+      this.checkStatus(data, status, '', 'members/getMembers', 'members/getPendingMembers');
+     } else {
+      this.checkStatus(data, status, '', 'members/getMembers', 'members/getPendingMembers');
+     }
+    } else {
+     this.$toast.error('Contact must be a valid number and not contain any letters or special characters');
+    }
    },
    async updateStudent() {
+    if (this.update_data.userinfo.section_id == '') return this.$toast.error('Section is required');
+    var contactval = /^((639)(|\d{9,9}))$/gm;
     this.update_data.userinfo.acad_year = this.update_data.userinfo.academic_year;
     if (this.update_data.student_id == '') return this.$toast.error('Student ID is required');
     if (this.update_data.email == '') return this.$toast.error('Email is required');
@@ -571,18 +673,20 @@
     if (this.update_data.userinfo.contact == '') return this.$toast.error('Contact is required');
     if (this.update_data.userinfo.type == '') return this.$toast.error('Account Type is required');
     if (this.update_data.userinfo.course_id == '') return this.$toast.error('Course is required');
-    if (this.update_data.userinfo.section_id == '') return this.$toast.error('Section is required');
     if (this.update_data.userinfo.year_level == '') return this.$toast.error('Year Level is required');
     if (this.update_data.userinfo.organization_id == '') return this.$toast.error('Organization is required');
-
-    this.isLoading = true;
-    const { data, status } = await this.$store.dispatch('members/updateMember', this.update_data);
-    this.checkStatus(data, status, 'update', 'members/getMembers', 'members/getPendingMembers');
+    if (this.update_data.userinfo.contact.match(contactval)) {
+     this.isLoading = true;
+     const { data, status } = await this.$store.dispatch('members/updateMember', this.update_data);
+     this.checkStatus(data, status, 'update', 'members/getMembers', 'members/getAdmins');
+    } else {
+     this.$toast.error('Contact must be a valid number and not contain any letters or special characters');
+    }
    },
    async deleteStudent(page = 1) {
     this.isLoading = true;
     const { data, status } = await this.$store.dispatch('members/deleteMember', this.delete_data);
-    this.checkStatus(data, status, '', 'members/getMembers', 'members/getPendingMembers');
+    this.checkStatus(data, status, '', 'members/getMembers', 'members/getAdmins');
     await this.$store.dispatch('members/getPendingMembers', { page: page, sort: this.sort });
    },
    closeModal() {
@@ -592,6 +696,7 @@
   watch: {
    sort() {
     this.getMembers();
+    this.getAdmins();
     this.getPendingMembers();
    },
   },

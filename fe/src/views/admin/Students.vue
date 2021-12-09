@@ -230,8 +230,11 @@
    </div>
    <div class="row">
     <div class="col-6">
-     <label class="mt-2" for="contact">Contact</label>
-     <input v-model="data.contact" id="contact" type="text" class="form-control" placeholder="" />
+     <label for="" class="mt-2">Contact</label>
+     <div class="input-group mb-3">
+      <span class="input-group-text" id="basic-addon1">+63</span>
+      <input v-model="data.contact" type="number" class="form-control" placeholder="9366036099" aria-label="9366036099" aria-describedby="basic-addon1" />
+     </div>
     </div>
     <div class="col-6">
      <label class="mt-2">Course</label>
@@ -327,8 +330,10 @@
    </div>
    <div class="row">
     <div class="col-6">
-     <label class="mt-2" for="contact">Contact</label>
-     <input v-model="update_data.userinfo.contact" id="contact" type="text" class="form-control" placeholder="" />
+     <label for="" class="mt-2">Contact</label>
+     <div class="input-group mb-3">
+      <input v-model="update_data.userinfo.contact" type="number" class="form-control" placeholder="9366036099" aria-label="9366036099" aria-describedby="basic-addon1" />
+     </div>
     </div>
     <div class="col-6">
      <label class="mt-2">Course</label>
@@ -609,6 +614,7 @@
     await this.$store.dispatch('students/getPendingStudents', { page: page, sort: this.sort });
    },
    async saveStudent() {
+    var contactval = /^((9)(|\d{9,9}))$/gm;
     if (this.data.student_id == '') return this.$toast.error('Student ID is required');
     if (this.data.section_id == '') return this.$toast.error('Section is required');
     if (this.data.course_id == '') return this.$toast.error('Course is required');
@@ -625,12 +631,23 @@
     if (this.data.academic_year == '') return this.$toast.error('Academic year is required');
     this.data.academic_year[1] = this.data.academic_year[1].toString().substring(2);
     this.data.acad_year = this.data.academic_year.join('-');
-
-    this.isLoading = true;
-    const { data, status } = await this.$store.dispatch('students/saveStudent', this.data);
-    this.checkStatus(data, status, '', 'students/getStudents', 'students/getPendingStudents');
+    if (this.data.contact.match(contactval)) {
+     const { data, status } = await this.$store.dispatch('students/saveStudent', this.data);
+     if (status == 200) {
+      var string = '63';
+      var number = string + this.data.contact;
+      this.data.contact = number;
+      this.isLoading = true;
+      this.checkStatus(data, status, '', 'students/getStudents', 'students/getPendingStudents');
+     } else {
+      this.checkStatus(data, status, '', 'students/getStudents', 'students/getPendingStudents');
+     }
+    } else {
+     this.$toast.error('Contact must be a valid number and not contain any letters or special characters');
+    }
    },
    async updateStudent() {
+    var contactval = /^((639)(|\d{9,9}))$/gm;
     this.update_data.userinfo.acad_year = this.update_data.userinfo.academic_year;
     if (this.update_data.userinfo.academic_year.trim() == '') return this.$toast.error('Academic year is required');
     if (this.update_data.student_id == '') return this.$toast.error('Student ID is required');
@@ -646,10 +663,13 @@
     if (this.update_data.userinfo.type == '') return this.$toast.error('Account Type is required');
     if (this.update_data.userinfo.year_level == '') return this.$toast.error('Year Level is required');
     if (this.update_data.userinfo.organization_id == '') return this.$toast.error('Organization is required');
-
-    this.isLoading = true;
-    const { data, status } = await this.$store.dispatch('students/updateStudent', this.update_data);
-    this.checkStatus(data, status, 'update', 'students/getStudents', 'students/getPendingStudents');
+    if (this.update_data.userinfo.contact.match(contactval)) {
+     this.isLoading = true;
+     const { data, status } = await this.$store.dispatch('students/updateStudent', this.update_data);
+     this.checkStatus(data, status, 'update', 'students/getStudents', 'students/getPendingStudents');
+    } else {
+     this.$toast.error('Contact must be a valid number and not contain any letters or special characters');
+    }
    },
    async deleteStudent() {
     this.isLoading = true;

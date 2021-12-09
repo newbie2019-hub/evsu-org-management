@@ -35,7 +35,6 @@ class StudentsRequest extends FormRequest
             'last_name' => 'required|bail|max:50',
             'gender' => 'required|bail|max:15',
             'year_level' => 'required|bail|max:10',
-            'contact' => 'required|bail|max:15',
             'type' => 'required|bail|max:15',
             'section_id' => 'required|bail|exists:sections,id',
             'organization_id' => 'required|bail|exists:organizations,id',

@@ -23,19 +23,19 @@ class AnnouncementController extends Controller
     }
 
     public function store(AnnouncementRequest $request){
-        // Announcement::create($request->validated() + ['organization_id' => auth()->user()->userinfo->organization_id]);
         
-        $students = User::where('id', '<>', auth()->user()->id)->whereHas('userinfo', function($query){
+        $students = User::where('id', '<>', auth()->user()->id)->where('account_status', 'approved')->whereHas('userinfo', function($query){
             $query->where('organization_id', auth()->user()->userinfo->organization_id);
         })->with(['userinfo'])->get();
-
+        
         $msg = 'What: ' . $request->what . ' Where: ' . $request->where . ' When : ' .$request->when .' Who : '. $request->who .'';
-
+        
         // return response()->json(['msg' => $msg, 'student' => $students, 'specific' => $student->userinfo->contact]);
         foreach($students as $student){
             $this->sendSmsNotification($student->userinfo->contact, $msg);
         }
-
+        
+        Announcement::create($request->validated() + ['organization_id' => auth()->user()->userinfo->organization_id]);
         return $this->success('Announcement created successfully');
 
     }

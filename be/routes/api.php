@@ -55,6 +55,8 @@ Route::group(['middleware' => 'api'], function (){
         Route::get('courses/all', [CoursesController::class, 'showall']);
         Route::apiResource('courses', CoursesController::class);
         Route::get('organization/all', [OrganizationController::class, 'showall']);
+        Route::get('organization/coursetype', [OrganizationController::class, 'coursetype']);
+        Route::get('organization/valuestype', [OrganizationController::class, 'valuestype']);
         Route::post('search/organization', [OrganizationController::class, 'search']);
         Route::apiResource('organization', OrganizationController::class);
         Route::post('search/students', [StudentsController::class, 'search']);
@@ -69,6 +71,7 @@ Route::group(['middleware' => 'api'], function (){
         Route::get('members/all', [MembersController::class, 'showall']);
         Route::get('pendingmembers', [MembersController::class, 'pendingMembers']);
         Route::get('admins', [MembersController::class, 'allAdmins']);
+        Route::get('orgadmins', [MembersController::class, 'admins']);
         Route::apiResource('members', MembersController::class);
         Route::put('approve/{id}', [MembersController::class, 'approveMember']);
         Route::get('announcement/all', [AnnouncementController::class, 'showall']);

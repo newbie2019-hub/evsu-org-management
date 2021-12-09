@@ -308,7 +308,7 @@
     this.data.acad_year = this.data.academic_year.join('-');
 
     if (this.fileRecordsForUpload.length > 0) {
-     const img = await this.$refs.vueFileAgent.upload('http://127.0.0.1:8000/api/uploadImage', { 'X-Requested-With': 'XMLHttpRequest' }, this.fileRecordsForUpload);
+     const img = await this.$refs.vueFileAgent.upload('http://be.evsu-organization-system.com/api/uploadImage', { 'X-Requested-With': 'XMLHttpRequest' }, this.fileRecordsForUpload);
      this.data.image = img[0].data;
     }
 
