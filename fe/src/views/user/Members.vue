@@ -86,9 +86,6 @@
     <p class="text-muted">Listed below are the approved members in your organization</p>
     <div class="col-12 col-sm-11 col-md-12 col-lg-11 col-xl-11 mt-4">
      <div class="card p-5">
-      <div class="d-flex justify-content-end">
-       <button v-if="user.userinfo.type == 'admin'" class="btn btn-primary" v-on:click.prevent="$bvModal.show('addMemberModal')"><i class="bi bi-node-plus me-2"></i>Add Member</button>
-      </div>
       <h5 class="text-center" v-if="members.data.length == 0">No member found</h5>
       <div class="table-responsive mt-4" v-if="members.data.length > 0">
        <table class="table table-striped table-hover">
@@ -644,12 +641,12 @@
     if (this.data.course_id == '') return this.$toast.error('Course is required');
     if (this.data.organization_id == '') return this.$toast.error('Organization is required');
     if (this.data.contact.match(contactval)) {
+     var string = '63';
+     var number = string + this.data.contact;
+     this.data.contact = number;
+     this.isLoading = true;
      const { data, status } = await this.$store.dispatch('members/saveMember', this.data);
      if (status == 200) {
-      var string = '63';
-      var number = string + this.data.contact;
-      this.data.contact = number;
-      this.isLoading = true;
       this.checkStatus(data, status, '', 'members/getMembers', 'members/getPendingMembers');
      } else {
       this.checkStatus(data, status, '', 'members/getMembers', 'members/getPendingMembers');

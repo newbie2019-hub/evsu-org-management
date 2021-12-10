@@ -22,6 +22,7 @@ class AdminAccountSeeder extends Seeder
             'last_name' => 'Garrido II',
             'gender' => 'Female',
             'contact_number' => '00000000000',
+            'organization_id' => 1,
         ]);
 
         AdminAccount::create([

@@ -43,8 +43,8 @@
           <td>{{ announcement.what }}</td>
           <td>{{ announcement.where }}</td>
           <td>{{ announcement.when }}</td>
-          <td>{{ announcement.who }}</td>
-          <td v-if="user.userinfo.type == 'admin'">
+          <td :colspan="announcement.organization_id == '1' ? '2' : ''">{{ announcement.who }}</td>
+          <td v-if="user.userinfo.type == 'admin' && announcement.organization_id != '1'">
            <div class="d-flex">
             <a
              v-on:click.prevent="

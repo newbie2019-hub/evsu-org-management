@@ -19,6 +19,7 @@ class CreateAdminAccountInfosTable extends Migration
             $table->string('middle_name');
             $table->string('last_name');
             $table->string('gender');
+            $table->foreignId('organization_id')->constrained()->onDelete('cascade');
             $table->string('contact_number');
             $table->string('image')->nullable();
             $table->timestamps();

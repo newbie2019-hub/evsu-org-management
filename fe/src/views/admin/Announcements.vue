@@ -6,6 +6,9 @@
     <p class="text-muted">Organization announcements are listed below</p>
     <div class="col-12 col-sm-11 col-md-12 col-lg-11 col-xl-11 mt-4">
      <div class="card p-5">
+      <div class="d-flex justify-content-end">
+       <button class="btn btn-primary" v-on:click.prevent="$bvModal.show('addAnnouncementModal')"><i class="bi bi-node-plus me-2"></i>Create</button>
+      </div>
       <div class="table-responsive mt-4">
        <table class="table table-striped table-hover">
         <caption>
@@ -48,6 +51,16 @@
           <td>
            <div class="d-flex">
             <a
+             v-if="announcement.organization_id == '1'"
+             v-on:click.prevent="
+              data = { ...announcement };
+              $bvModal.show('updateAnnouncementModal');
+             "
+             href=""
+             class="btn btn-primary btn-sm me-1 rounded-pill"
+             ><i class="bi bi-pencil"></i
+            ></a>
+            <a
              v-on:click.prevent="
               delete_data.id = announcement.id;
               $bvModal.show('deleteAnnouncementModal');
@@ -73,6 +86,48 @@
    </div>
   </div>
 
+  <b-modal id="addAnnouncementModal" centered title="Add Announcement">
+   <div class="row pe-4 ps-4 pt-1 pb-2">
+    <div class="col">
+     <label class="mt-2" for="remarks">What</label>
+     <textarea v-model="data.what" id="remarks" type="text" class="form-control" placeholder="" aria-label="What"></textarea>
+     <label class="mt-2" for="remarks">Where</label>
+     <textarea v-model="data.where" id="remarks" type="text" class="form-control" placeholder="" aria-label="Where"></textarea>
+     <label class="mt-2" for="remarks">When</label>
+     <textarea v-model="data.when" id="remarks" type="text" class="form-control" placeholder="" aria-label="When"></textarea>
+     <label class="mt-2" for="remarks">Who</label>
+     <textarea v-model="data.who" id="remarks" type="text" class="form-control" placeholder="" aria-label="Who"></textarea>
+    </div>
+   </div>
+   <template #modal-footer="{cancel}">
+    <b-button variant="primary" size="sm" @click="cancel()" :disabled="isLoading"> Cancel </b-button>
+    <b-button variant="success" size="sm" v-on:click.prevent="saveAnnouncement" :disabled="isLoading">
+     Save
+    </b-button>
+   </template>
+  </b-modal>
+
+  <b-modal id="updateAnnouncementModal" centered title="Update Announcement">
+   <div class="row pe-4 ps-4 pt-1 pb-2">
+    <div class="col">
+     <label class="mt-2" for="remarks">What</label>
+     <textarea v-model="data.what" id="remarks" type="text" class="form-control" placeholder="" aria-label="What"></textarea>
+     <label class="mt-2" for="remarks">Where</label>
+     <textarea v-model="data.where" id="remarks" type="text" class="form-control" placeholder="" aria-label="Where"></textarea>
+     <label class="mt-2" for="remarks">When</label>
+     <textarea v-model="data.when" id="remarks" type="text" class="form-control" placeholder="" aria-label="When"></textarea>
+     <label class="mt-2" for="remarks">Who</label>
+     <textarea v-model="data.who" id="remarks" type="text" class="form-control" placeholder="" aria-label="Who"></textarea>
+    </div>
+   </div>
+   <template #modal-footer="{cancel}">
+    <b-button variant="primary" size="sm" @click="cancel()" :disabled="isLoading"> Cancel </b-button>
+    <b-button variant="success" size="sm" v-on:click.prevent="updateAnnouncement" :disabled="isLoading">
+     Update
+    </b-button>
+   </template>
+  </b-modal>
+
   <b-modal id="deleteAnnouncementModal" centered title="Confirm Delete">
    <p>Are you sure you want to delete?</p>
    <template #modal-footer="{cancel}">
@@ -91,6 +146,12 @@
  export default {
   data() {
    return {
+    data: {
+     what: '',
+     who: '',
+     when: '',
+     where: '',
+    },
     delete_data: {
      id: '',
     },
@@ -104,10 +165,16 @@
    this.$root.$on('bv::modal::show', (modalId) => {
     this.modalId = modalId.componentId;
    });
-   this.$root.$on('bv::modal::hide', (modalId) => {});
+   this.$root.$on('bv::modal::hide', (modalId) => {
+    this.data.what = '';
+    this.data.where = '';
+    this.data.when = '';
+    this.data.who = '';
+   });
   },
   computed: {
    ...mapState('announcement', ['allannouncements']),
+   ...mapState('students', ['announcements']),
    ...mapState('auth', ['user']),
   },
   methods: {
@@ -116,6 +183,26 @@
      page: page,
      sort: this.sort,
     });
+   },
+   async saveAnnouncement() {
+    if (this.data.what == '') return this.$toast.error('What input field is required');
+    if (this.data.where == '') return this.$toast.error('Where input field is required');
+    if (this.data.when == '') return this.$toast.error('When input field is required');
+    if (this.data.who == '') return this.$toast.error('Who input field is required');
+
+    this.isLoading = true;
+    const { data, status } = await this.$store.dispatch('students/saveAnnouncement', this.data);
+    this.checkStatus(data, status, '', 'announcement/allAnnouncements', '');
+   },
+   async updateAnnouncement() {
+    if (this.data.what == '') return this.$toast.error('What input field is required');
+    if (this.data.where == '') return this.$toast.error('Where input field is required');
+    if (this.data.when == '') return this.$toast.error('When input field is required');
+    if (this.data.who == '') return this.$toast.error('Who input field is required');
+
+    this.isLoading = true;
+    const { data, status } = await this.$store.dispatch('students/updateAnnouncement', this.data);
+    this.checkStatus(data, status, 'update', 'announcement/allAnnouncements', '');
    },
    async deleteAnnouncement() {
     this.isLoading = true;

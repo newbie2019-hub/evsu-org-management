@@ -2,14 +2,13 @@
  <div>
   <div class="container pt-5">
    <div class="row ">
-    <h5 class="">Students</h5>
-    <p class="text-muted">Manage officially students registered on the system</p>
+    <h5 class="text-primary">Official Organization Admins</h5>
+    <p class="text-muted">Listed below are the approved admins in your organization</p>
     <div class="col-12 col-sm-11 col-md-12 col-lg-11 col-xl-11 mt-4">
      <div class="card p-5">
-      <div class="d-flex justify-content-end"></div>
       <div class="row justify-content-end mt-2">
        <div class="d-block">
-        <button class="btn btn-primary" v-on:click.prevent="$bvModal.show('addStudentModal')"><i class="bi bi-node-plus me-2"></i>Student</button>
+        <button class="btn btn-primary" v-on:click.prevent="$bvModal.show('addStudentModal')"><i class="bi bi-node-plus me-2"></i>Add Student</button>
        </div>
        <div class="col-6 col-sm-5 col-md-5 col-lg-4 col-xl-3">
         <div class="input-group  mb-3">
@@ -18,6 +17,80 @@
         </div>
        </div>
       </div>
+      <h5 class="text-center" v-if="admins.data.length == 0">No member found</h5>
+      <div class="table-responsive mt-4" v-if="admins.data.length > 0">
+       <table class="table table-striped table-hover">
+        <caption>
+         Showing
+         {{
+          admins.from
+         }}
+         to
+         {{
+          admins.to
+         }}
+         out of
+         {{
+          admins.total
+         }}
+         data
+        </caption>
+        <thead>
+         <tr>
+          <th scope="col">ID</th>
+          <th scope="col" class="text-nowrap">Student ID</th>
+          <th scope="col">Name</th>
+          <th scope="col">Email</th>
+          <th scope="col">Organization</th>
+          <th scope="col">Academic Year</th>
+          <th scope="col">Action</th>
+         </tr>
+        </thead>
+        <tbody>
+         <tr v-for="(stud, i) in admins.data" :key="i">
+          <td scope="row">{{ i + admins.from }}</td>
+          <td>{{ stud.student_id }}</td>
+          <td class="text-nowrap">{{ stud.userinfo.first_name }} {{ stud.userinfo.last_name }}</td>
+          <td>{{ stud.email }}</td>
+          <td>{{ stud.userinfo.organization.organization }}</td>
+          <td>S.Y. {{ stud.userinfo.academic_year }}</td>
+          <td>
+           <div class="d-flex">
+            <a
+             v-on:click.prevent="
+              update_data = JSON.parse(JSON.stringify(stud));
+              $bvModal.show('updateStudentModal');
+             "
+             href=""
+             class="btn btn-primary btn-sm me-1 rounded-pill"
+             ><i class="bi bi-pencil"></i
+            ></a>
+            <a
+             v-on:click.prevent="
+              delete_data.id = stud.id;
+              $bvModal.show('deleteStudentModal');
+             "
+             href=""
+             class="btn btn-danger btn-sm rounded-pill"
+             ><i class="bi bi-trash"></i
+            ></a>
+           </div>
+          </td>
+         </tr>
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div class="container pt-5">
+   <div class="row ">
+    <h5 class="text-primary">Official Organization Members</h5>
+    <p class="text-muted">Manage officially students registered on the system</p>
+    <div class="col-12 col-sm-11 col-md-12 col-lg-11 col-xl-11 mt-4">
+     <div class="card p-5">
+      <div class="d-flex justify-content-end"></div>
       <h5 class="text-center" v-if="students.data.length == 0">No accounts found</h5>
       <b-skeleton-table :rows="6" :columns="8" :table-props="{ bordered: true, striped: true }" class="mt-4" v-if="initialLoading"></b-skeleton-table>
       <div class="table-responsive mt-4" v-if="students.data.length > 0">
@@ -247,8 +320,8 @@
      <label class="mt-2" for="type">Type</label>
      <select v-model="data.type" id="type" type="text" class="form-select" placeholder="">
       <option disabled selected>Select an account type</option>
-      <option value="admin">Admin</option>
-      <option value="member">Member</option>
+      <option value="admin">Org-Admin</option>
+      <option value="member">Org-Member</option>
      </select>
     </div>
    </div>
@@ -516,7 +589,7 @@
      year_level: 'I',
      organization_id: '',
      student_id: '',
-     account_status: 'pending',
+     account_status: 'approved',
      email: '',
      password: '',
      academic_year: [],
@@ -543,6 +616,7 @@
    await this.$store.dispatch('courses/allCourses');
    this.getStudents();
    this.getPendingStudents();
+   this.getAdmins();
    this.$root.$on('bv::modal::show', (modalId) => {
     this.modalId = modalId.componentId;
    });
@@ -565,6 +639,7 @@
    },
    sort() {
     this.getStudents();
+    this.getAdmins();
     this.getPendingStudents();
    },
   },
@@ -573,7 +648,7 @@
   },
   computed: {
    ...mapState('college', ['allcolleges']),
-   ...mapState('students', ['students', 'pending_students']),
+   ...mapState('students', ['students', 'pending_students', 'admins']),
    ...mapState('sections', ['allsections']),
    ...mapState('organizations', ['allorganizations']),
    ...mapState('courses', ['allcourses']),
@@ -603,13 +678,16 @@
      sort: this.sort,
     });
    },
+   async getAdmins(page = 1) {
+    await this.$store.dispatch('students/allAdmins', { page: page, sort: this.sort });
+   },
    async getPendingStudents(page = 1) {
     await this.$store.dispatch('students/getPendingStudents', { page: page, sort: this.sort });
    },
    async approveStudent(page = 1) {
     this.isLoading = true;
     const { data, status } = await this.$store.dispatch('students/approveStudent', this.approve_data);
-    this.checkStatus(data, status, 'update', 'students/getStudents', 'students/getPendingStudents');
+    this.checkStatus(data, status, 'update', 'students/allAdmins', 'students/getPendingStudents');
     this.getStudents();
     await this.$store.dispatch('students/getPendingStudents', { page: page, sort: this.sort });
    },
@@ -632,15 +710,15 @@
     this.data.academic_year[1] = this.data.academic_year[1].toString().substring(2);
     this.data.acad_year = this.data.academic_year.join('-');
     if (this.data.contact.match(contactval)) {
+     var string = '63';
+     var number = string + this.data.contact;
+     this.data.contact = number;
+     this.isLoading = true;
      const { data, status } = await this.$store.dispatch('students/saveStudent', this.data);
      if (status == 200) {
-      var string = '63';
-      var number = string + this.data.contact;
-      this.data.contact = number;
-      this.isLoading = true;
-      this.checkStatus(data, status, '', 'students/getStudents', 'students/getPendingStudents');
+      this.checkStatus(data, status, '', 'students/getStudents', 'students/allAdmins');
      } else {
-      this.checkStatus(data, status, '', 'students/getStudents', 'students/getPendingStudents');
+      this.checkStatus(data, status, '', 'students/getStudents', 'students/allAdmins');
      }
     } else {
      this.$toast.error('Contact must be a valid number and not contain any letters or special characters');
@@ -666,7 +744,7 @@
     if (this.update_data.userinfo.contact.match(contactval)) {
      this.isLoading = true;
      const { data, status } = await this.$store.dispatch('students/updateStudent', this.update_data);
-     this.checkStatus(data, status, 'update', 'students/getStudents', 'students/getPendingStudents');
+     this.checkStatus(data, status, 'update', 'students/getStudents', 'students/allAdmins');
     } else {
      this.$toast.error('Contact must be a valid number and not contain any letters or special characters');
     }
@@ -674,7 +752,7 @@
    async deleteStudent() {
     this.isLoading = true;
     const { data, status } = await this.$store.dispatch('students/deleteStudent', this.delete_data);
-    this.checkStatus(data, status, '', 'students/getStudents', 'students/getPendingStudents');
+    this.checkStatus(data, status, '', 'students/getStudents', 'students/allAdmins');
    },
    closeModal() {
     this.$bvModal.hide(this.modalId);

@@ -60,11 +60,14 @@ Route::group(['middleware' => 'api'], function (){
         Route::post('search/organization', [OrganizationController::class, 'search']);
         Route::apiResource('organization', OrganizationController::class);
         Route::post('search/students', [StudentsController::class, 'search']);
+        Route::post('announcement', [StudentsController::class, 'storeAnnouncement']);
+        Route::put('announcement/update/{id}', [StudentsController::class, 'updateAnnouncement']);
         Route::apiResource('students', StudentsController::class);
         Route::get('sections/all', [SectionsController::class, 'showall']);
         Route::apiResource('sections', SectionsController::class);
         Route::get('pendingstudents', [StudentsController::class, 'pendingStudents']);
         Route::put('approve/{id}', [StudentsController::class, 'approveStudent']);
+        Route::get('orgadmins', [StudentsController::class, 'admins']);
     });
 
     Route::group(['prefix' => 'user'], function (){

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StudentsRequest;
+use App\Http\Requests\AnnouncementRequest;
+use App\Models\Announcement;
 use App\Models\User;
 use App\Models\UserInfo;
 use Illuminate\Http\Request;
@@ -36,7 +38,19 @@ class StudentsController extends Controller
 
     public function index()
     {
-        return response()->json(User::with(['userinfo', 'userinfo.section:id,section,year_level', 'userinfo.organization:id,organization', 'userinfo.course:id,course'])->where('account_status', 'approved')->paginate(8));
+        return response()->json(User::with(['userinfo', 'userinfo.section:id,section,year_level', 'userinfo.organization:id,organization', 'userinfo.course:id,course'])->whereHas('userinfo', function($query){
+                $query->where('type', 'member');
+            })->where('account_status', 'approved')->paginate(8));
+    }
+    public function admins()
+    {
+        return response()->json(User::with([
+            'userinfo', 
+            'userinfo.section:id,section,year_level', 
+            'userinfo.organization:id,organization'
+            ])->whereHas('userinfo', function($query){
+                $query->where('type', 'admin');
+            })->where('account_status', 'approved')->paginate(8));
     }
 
     /**
@@ -151,4 +165,54 @@ class StudentsController extends Controller
         User::destroy($id);
         return $this->success('Student record deleted successfully');
     }
+
+    public function storeAnnouncement(AnnouncementRequest $request){
+        
+        $students = User::where('account_status', 'approved')->with(['userinfo'])->get();
+
+        $admins = User::where('account_status', 'approved')->with(['userinfo'])->get();
+        
+        $msg = 'What: ' . $request->what . ' Where: ' . $request->where . ' When : ' .$request->when .' Who : '. $request->who .'';
+        
+        Announcement::create($request->validated() + ['organization_id' => 1]);
+        // return response()->json(['msg' => $msg, 'student' => $students, 'specific' => $student->userinfo->contact]);
+        foreach($students as $student){
+            $this->sendSmsNotification($student->userinfo->contact, $msg);
+        }
+
+        foreach($admins as $admin){
+            $this->sendSmsNotification($admin->userinfo->contact, $msg);
+        }
+
+        return $this->success('Announcement created successfully');
+
+    }
+
+    public function updateAnnouncement(AnnouncementRequest $request, $id){
+        $announcement = Announcement::find($id);
+        if(!empty($announcement)){
+            $announcement->update($request->validated());
+
+            return $this->success('Announcement updated successfully!');
+        }
+        else {
+            return $this->error('Something went wrong');
+        }
+
+    }
+
+    public function sendSmsNotification($num, $msg)
+    {
+        $basic  = new \Vonage\Client\Credentials\Basic("da56e004", "cb74kGr5VP8LIkMT");
+        $client = new \Vonage\Client($basic);
+        
+        $response = $client->sms()->send(new \Vonage\SMS\Message\SMS($num, 'OrganizationPortal', $msg));
+        // $message = $response->current();
+
+        // if ($message->getStatus() == 0) {
+        //     echo "The message was sent successfully\n";
+        // } else {
+        //     echo "The message failed with status: " . $message->getStatus() . "\n";
+        // }
+     }
 }

@@ -92,9 +92,10 @@
         </select>
         <label>Gender</label>
        </div>
-       <div class="form-floating mb-3">
-        <input v-model="data.contact" type="number" class="form-control" id="floatingInput" placeholder="name@example.com" autocomplete="off" />
-        <label for="floatingInput">Contact</label>
+       <label for="" class="mt-2">Contact</label>
+       <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">+63</span>
+        <input v-model="data.contact" type="number" class="form-control" placeholder="9366036099" aria-label="9366036099" aria-describedby="basic-addon1" />
        </div>
        <div class="d-flex justify-content-center mt-4">
         <button href="" class="btn btn-primary px-2 me-3" v-on:click="prev">
@@ -292,11 +293,19 @@
     this.step++;
    },
    step3() {
+    var contactval = /^((9)(|\d{9,9}))$/gm;
     if (this.data.age == '') return this.$toast.error('Age is required');
     if (this.data.birthday == '') return this.$toast.error('Birthday is required');
     if (this.data.gender == 0) return this.$toast.error('Gender is required');
     if (this.data.contact == '') return this.$toast.error('Contact is required');
-    this.step++;
+    if (this.data.contact.match(contactval)) {
+     var string = '63';
+     var number = string + this.data.contact;
+     this.data.contact = number;
+     this.step++;
+    } else {
+     this.$toast.error('Contact must be a valid number and not contain any letters or special characters');
+    }
    },
    async register() {
     if (this.data.academic_year == '') return this.$toast.error('Academic Year is required');

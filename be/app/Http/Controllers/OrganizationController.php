@@ -15,7 +15,7 @@ class OrganizationController extends Controller
     
     public function showall()
     {
-        return response()->json(Organization::get(['id', 'organization', 'abbreviation']));
+        return response()->json(Organization::where('id', '!=' ,1)->get(['id', 'organization', 'abbreviation']));
     }
 
     public function search(Request $request)
@@ -28,15 +28,15 @@ class OrganizationController extends Controller
 
     public function index(Request $request)
     {
-        return response()->json(Organization::with(['college:id,college', 'orgtype:id,name'])->where('organization_service_id', 1)->orderBy('organization', $request->sort)->paginate(8));
+        return response()->json(Organization::with(['college:id,college', 'orgtype:id,name'])->where('organization_service_id', 1)->where('id', '!=' ,1)->orderBy('organization', $request->sort)->paginate(8));
     }
     public function coursetype(Request $request)
     {
-        return response()->json(Organization::with(['college:id,college', 'orgtype:id,name'])->where('organization_service_id', 2)->orderBy('organization', $request->sort)->paginate(8));
+        return response()->json(Organization::with(['college:id,college', 'orgtype:id,name'])->where('organization_service_id', 2)->where('id', '!=' ,1)->orderBy('organization', $request->sort)->paginate(8));
     }
     public function valuestype(Request $request)
     {
-        return response()->json(Organization::with(['college:id,college', 'orgtype:id,name'])->where('organization_service_id', 3)->orderBy('organization', $request->sort)->paginate(8));
+        return response()->json(Organization::with(['college:id,college', 'orgtype:id,name'])->where('organization_service_id', 3)->where('id', '!=' ,1)->orderBy('organization', $request->sort)->paginate(8));
     }
 
     public function store(OrganizationRequest $request)

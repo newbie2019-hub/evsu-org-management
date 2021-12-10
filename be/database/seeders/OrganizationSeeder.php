@@ -16,6 +16,12 @@ class OrganizationSeeder extends Seeder
     {
         $data = [
             [
+                'organization_service_id' => 3,
+                'college_id' => rand(1, 6),
+                'organization' => 'MANAGEMENT',
+                'abbreviation' => 'MGT',
+            ],
+            [
                 'organization_service_id' => rand(1, 3),
                 'college_id' => rand(1, 6),
                 'organization' => 'Organization 1 Sample',

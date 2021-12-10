@@ -26,7 +26,7 @@ class AdminAuthController extends Controller
 
     public function me()
     {
-        $user = AdminAccount::with(['admininfo'])->where('id', auth()->guard('admin')->user()->id)->first();
+        $user = AdminAccount::with(['admininfo', 'admininfo.organization:id,organization'])->where('id', auth()->guard('admin')->user()->id)->first();
         return response()->json($user);
     }
 
